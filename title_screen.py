@@ -27,4 +27,3 @@ def main():
     runAppWithScreens(initialScreen='title')
 
 main()
-cmu_graphics.run()
