@@ -5,6 +5,7 @@ def isWithinRect(centerX, centerY, width, height, mouseX, mouseY):
         return True
     return False
 
+# Checks if a mouse action occurred inside a rectangle (rects aligned by their top left)
 def isWithinRectTopLeft(topLeftX, topLeftY, width, height, mouseX, mouseY):
     if (topLeftX <= mouseX <= topLeftX + width) and (topLeftY - height <= mouseY <= topLeftY + height):
         return True
