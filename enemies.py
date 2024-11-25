@@ -22,3 +22,11 @@ class Monster:
 
     def setTargetCoord(self, newTargetCoord):
         self.targetCoord = newTargetCoord
+
+class Serpent(Monster):
+    def __init__(self, position, previousCoord, targetCoord, name="Serpent"):
+        super().__init__(name, position, previousCoord, targetCoord)
+        self.iconPath = "assets/images/enemies/serpent.png"
+
+    def getIconPath(self):
+        return self.iconPath
