@@ -8,7 +8,9 @@ def game_onScreenActivate(app):
     app.enemiesList = []
     app.towersList = []
     app.roundStarted = False
-    app.stepsPerSecond = 20
+    app.stepsPerSecond = 15
+    app.coordsList = readLineCoords("sample_paths.txt")
+    app.startCoord = app.coordsList[0]
 
 def game_redrawAll(app):
     # drawLabel('Started', app.width // 2, app.height // 5, size=80, font="monospace", bold=True)
@@ -19,11 +21,9 @@ def game_redrawAll(app):
         for posY in range(6):
             drawRect(810 + posX*90, 50 + posY*90, 85, 85, fill='white', border='black', borderWidth=2)
 
-    coordsList = readLineCoords("sample_paths.txt")
-    if len(coordsList) > 1:
-        for index in range(1, len(coordsList)):
-            print(coordsList[index-1], coordsList[index])
-            drawLine(coordsList[index-1][0], coordsList[index-1][1], coordsList[index][0], coordsList[index][1])
+    if len(app.coordsList) > 1:
+        for index in range(1, len(app.coordsList)):
+            drawLine(app.coordsList[index-1][0], app.coordsList[index-1][1], app.coordsList[index][0], app.coordsList[index][1])
 
     for enemy in app.enemiesList:
         currentPosition = enemy.getPosition()
@@ -33,16 +33,29 @@ def game_redrawAll(app):
 
 def spawnEnemies(app, numMonsters=1):
     for i in range(numMonsters):
-        enemy = Monster("Serpent", (10,10))
+        enemy = Monster("Serpent", app.startCoord, app.startCoord, app.coordsList[1])
         app.enemiesList.append(enemy)
 
 def game_onStep(app):
     if app.enemiesList != []:
         for enemy in app.enemiesList:
             currentPosition = enemy.getPosition()
-            positionX, positionY = currentPosition
-            newPosition = (positionX + 10, positionY + 10)
+            newPosition = getNextPosition(app, currentPosition, enemy.getPreviousCoord(), enemy.getTargetCoord(), enemy)
             enemy.setPosition(newPosition)
+
+def getNextPosition(app, currentPosition, previousCoord, targetCoord, enemy):
+    distance = getDistance(currentPosition, targetCoord)
+    stepSize = 10
+    print("prev", previousCoord, "tar", targetCoord)
+    if distance < 2:
+        previousCoord = targetCoord
+        targetCoord = app.coordsList[app.coordsList.index(targetCoord)+1]
+        enemy.setPreviousCoord(previousCoord)
+        enemy.setTargetCoord(targetCoord)
+        print("dist less","prev",previousCoord,"tar",targetCoord)
+    return (currentPosition[0] + (targetCoord[0]-currentPosition[0])/stepSize, currentPosition[1] +
+            (targetCoord[1]-currentPosition[1])/stepSize)
+
 
 def game_onMousePress(app, mouseX, mouseY):
     app.pointerColor = "lightgreen"

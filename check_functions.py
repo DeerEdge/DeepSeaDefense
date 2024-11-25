@@ -29,3 +29,10 @@ def readLineCoords(fileName):
             x, y = int(stringCoord[left+1:comma]), int(stringCoord[comma+1:right])
             coordsList.append((x, y))
     return coordsList
+
+# Gets the distance between two coordinates
+def getDistance(coord1, coord2):
+    coord1X, coord1Y = coord1
+    coord2X, coord2Y = coord2
+    distance = ((coord1X - coord2X)**2 + (coord1Y - coord2Y)**2)**0.5
+    return distance
