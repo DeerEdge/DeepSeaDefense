@@ -14,6 +14,7 @@ class Patrol_Tower(Tower):
              2: ["bullet", 3, 100, 300],
              3: ["bullet", 4, 200, 450]}
     towerCost = 100
+    upgradeCosts = {2: 150, 3: 300}
 
     def __init__(self, position, name="Patrol_Tower"):
         super().__init__(name, position)
@@ -24,6 +25,16 @@ class Patrol_Tower(Tower):
         self.cooldownDuration = 2
         self.cooldown = 0
         self.cost = 100
+
+    def upgrade(self):
+        if self.level < len(self.tiers):
+            self.level += 1
+            self.tier = self.tiers[self.level]
+            self.towerRadius = self.tier[2]
+            self.towerDamage = self.tier[3]
+
+    def getUpgradeCost(self):
+        return self.upgradeCosts.get(self.level+1, None)
 
     def getAttack(self):
         return self.tiers.get(self.level)

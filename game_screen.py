@@ -49,6 +49,7 @@ def game_redrawAll(app):
             drawRect(810 + posX*90, 50 + posY*90, 85, 85, fill='white', border='black', borderWidth=2)
             drawImage("assets/images/towers/patrol_tower.png", 812 + posX*90, 52 + posY*90, width=81, height=81)
 
+    # Draw line path
     if len(app.coordsList) > 1:
         for index in range(1, len(app.coordsList)):
             drawLine(app.coordsList[index-1][0], app.coordsList[index-1][1], app.coordsList[index][0],
@@ -81,6 +82,7 @@ def game_redrawAll(app):
         currentPosition = tower.getPosition()
         towerIcon = tower.getIconPath()
         drawImage(towerIcon, currentPosition[0], currentPosition[1], width=50, height=50, align='center')
+        drawLabel(f"Lvl. {tower.level}", currentPosition[0], currentPosition[1]-40, size=12, fill="white")
 
     for projectile in app.projectilesList:
         projectilePosition = projectile.getPosition()
@@ -219,25 +221,31 @@ def game_onMousePress(app, mouseX, mouseY):
         app.roundStarted = True
         spawnEnemies(app)
 
-    if app.selectedTower == None and app.roundStarted == True:
-        for posX in range(2):
-            for posY in range(6):
-                towerX, towerY = 810 + posX*90, 50 + posY*90
-                if isWithinRectTopLeft(towerX, towerY, towerX + 85, towerY + 85, mouseX, mouseY):
-                    tower = getSelectedTower(app, posX*6 + posY)
-                    if app.currency >= tower.towerCost:
-                        app.selectedTower = tower
-                    break
-    elif isWithinRectTopLeft(10, 10, 790, 590, mouseX, mouseY):
+    for tower in app.spawnedTowersList:
+        towerX, towerY = tower.getPosition()
+        if isWithinRect(towerX, towerY, 50, 50, mouseX, mouseY):
+            upgradeCost = tower.getUpgradeCost()
+            if upgradeCost != None and app.currency >= upgradeCost:
+                app.currency -= upgradeCost
+                tower.upgrade()
+                break
+
+    if isWithinRectTopLeft(810, 50, 180, 540, mouseX, mouseY):
+        if app.selectedTower == None and app.roundStarted == True:
+            for posX in range(2):
+                for posY in range(6):
+                    towerX, towerY = 810 + posX*90, 50 + posY*90
+                    if isWithinRectTopLeft(towerX, towerY, towerX + 85, towerY + 85, mouseX, mouseY):
+                        tower = getSelectedTower(app, posX*6 + posY)
+                        if app.currency >= tower.towerCost:
+                            app.selectedTower = tower
+                        break
+    elif app.selectedTower != None and isWithinRectTopLeft(10, 10, 790, 590, mouseX, mouseY):
         tower = app.selectedTower((mouseX, mouseY))
         app.spawnedTowersList.append(tower)
         app.currency -= tower.towerCost
         app.towersPlaced += 1
         app.selectedTower = None
-
-    # if isWithinRectTopLeft( 10, 10, 790, 590, mouseX, mouseY):
-    #     writeLineCoord("sample_paths.txt", (mouseX, mouseY))
-    #     print("Added point: ", (mouseX, mouseY))
 
 def isEnemyAtEnd(app, currentPosition):
     endCoord = app.coordsList[-1]
