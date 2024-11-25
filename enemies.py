@@ -24,9 +24,17 @@ class Monster:
         self.targetCoord = newTargetCoord
 
 class Serpent(Monster):
+    healthPoints = 1000
     def __init__(self, position, previousCoord, targetCoord, name="Serpent"):
         super().__init__(name, position, previousCoord, targetCoord)
         self.iconPath = "assets/images/enemies/serpent.png"
+        self.healthPoints = 1000
 
     def getIconPath(self):
         return self.iconPath
+
+    def getHealth(self):
+        return self.healthPoints
+
+    def setHealth(self, newHealthPoints):
+        self.healthPoints = newHealthPoints

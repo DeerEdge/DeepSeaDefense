@@ -17,6 +17,7 @@ def game_onScreenActivate(app):
     app.enemySpawnTimer = 0
     app.spawnInterval = 1 # Spawn a monster at every second
     app.selectedTower = None
+    app.round = 1
 
 def game_redrawAll(app):
     # drawLabel('Started', app.width // 2, app.height // 5, size=80, font="monospace", bold=True)
@@ -25,6 +26,7 @@ def game_redrawAll(app):
     drawRect(12, 12, 786, 586, fill=rgb(0, 79, 180))
     drawLabel('Towers', 900, 30, size=30, font="monospace", bold=True)
     drawLabel('Towers', 900, 30, size=30, font="monospace", bold=True)
+
     for posX in range(2):
         for posY in range(6):
             drawRect(810 + posX*90, 50 + posY*90, 85, 85, fill='white', border='black', borderWidth=2)
@@ -38,6 +40,10 @@ def game_redrawAll(app):
     for enemy in app.spawnedEnemiesList:
         currentPosition = enemy.getPosition()
         enemyIcon = enemy.getIconPath()
+        enemyHealthBarValue = enemy.getHealth()/type(enemy).healthPoints
+        print(enemyHealthBarValue, enemy.getHealth())
+        drawRect(currentPosition[0]-20, currentPosition[1] - 35, 40, 5, fill='crimson', align='left')
+        drawRect(currentPosition[0]-20, currentPosition[1] - 35, 40*enemyHealthBarValue, 5, fill='limeGreen', align='left')
         drawImage(enemyIcon, currentPosition[0], currentPosition[1], width=50, height=50, align='center')
 
     for tower in app.spawnedTowersList:
@@ -46,6 +52,14 @@ def game_redrawAll(app):
         drawImage(towerIcon, currentPosition[0], currentPosition[1], width=50, height=50, align='center')
 
     if app.selectedTower != None:
+        locationX, locationY = app.pointerLocation[0], app.pointerLocation[1]
+        if app.pointerLocation[0] <= 25: locationX = 25
+        elif app.pointerLocation[0] > 786: locationX = 786
+        if app.pointerLocation[1] <= 25: locationY = 25
+        elif app.pointerLocation[1] > 586: locationY = 586
+
+        drawCircle(locationX, locationY, app.selectedTower.initialTowerRadius, fill=rgb(160, 0, 0), border="red",
+                   align="center", borderWidth=2, opacity=40)
         drawImage(app.selectedTower.iconPath, app.pointerLocation[0]-25, app.pointerLocation[1]-25, width=50, height=50)
 
     # Draw Mouse Pointer
@@ -64,25 +78,42 @@ def game_onStep(app):
             newPosition = getNextPosition(app, currentPosition, enemy)
             enemy.setPosition(newPosition)
 
+    # Controls the spawning of enemies
     if app.roundStarted and app.toBeSpawnedList != []:
         app.enemySpawnTimer += 1
         if app.enemySpawnTimer >= app.spawnInterval * app.stepsPerSecond:
             app.spawnedEnemiesList.append(app.toBeSpawnedList.pop(0))
             app.enemySpawnTimer = 0
 
+    for tower in app.spawnedTowersList:
+        tower.reduceCooldown()
+        if tower.canAttack():
+            for enemy in app.spawnedEnemiesList:
+                enemyPosition = enemy.getPosition()
+                towerPosition = tower.getPosition()
+                distance = getDistance(towerPosition, enemyPosition)
+                towerRadius =  tower.getTowerRadius()
+
+                if distance <= towerRadius:
+                    newEnemyHealth = enemy.getHealth() - tower.getTowerDamage()
+                    enemy.setHealth(newEnemyHealth)
+                    tower.startCooldown()
+
+                    if enemy.getHealth() <= 0:
+                        app.spawnedEnemiesList.remove(enemy)
+                        break
+
 def getNextPosition(app, currentPosition, enemy):
     previousCoord = enemy.getPreviousCoord()
     targetCoord = enemy.getTargetCoord()
     distance = getDistance(currentPosition, targetCoord)
     stepSize = 10
-    print("prev", previousCoord, "tar", targetCoord)
 
     if distance < 2:
         previousCoord = targetCoord
         targetCoord = app.coordsList[app.coordsList.index(targetCoord)+1]
         enemy.setPreviousCoord(previousCoord)
         enemy.setTargetCoord(targetCoord)
-        print("dist less","prev",previousCoord,"tar",targetCoord)
 
     return (currentPosition[0] + (targetCoord[0]-currentPosition[0])/stepSize, currentPosition[1] +
             (targetCoord[1]-currentPosition[1])/stepSize)

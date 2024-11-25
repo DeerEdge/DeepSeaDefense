@@ -9,15 +9,41 @@ class Tower:
 
 class Patrol_Tower(Tower):
     iconPath = "assets/images/towers/patrol_tower.png"
+    initialTowerRadius = 100
+    tiers = {1: ["projectile", 1, 100, 100],
+             2: ["projectile", 3, 100, 300],
+             3: ["projectile", 4, 200, 450]}
+
     def __init__(self, position, name="Patrol_Tower"):
         super().__init__(name, position)
         self.iconPath = "assets/images/towers/patrol_tower.png"
-        self.tiers = {1:["projectile", 1, 20],
-                      2:["projectile", 3, 20],
-                      3:["projectile", 4, 30]}
+        self.tier = Patrol_Tower.tiers.get(self.level)
+        self.towerRadius = self.tier[2]
+        self.towerDamage = self.tier[3]
+        self.cooldownDuration = 2
+        self.cooldown = 0
 
     def getAttack(self):
         return self.tiers.get(self.level)
+
+    def canAttack(self):
+        if self.cooldown == 0:
+            return True
+        else:
+            return False
+
+    def reduceCooldown(self):
+        if self.cooldown > 0:
+            self.cooldown -= 1
+
+    def startCooldown(self):
+        self.cooldown = int(self.cooldownDuration*15)
+
+    def getTowerDamage(self):
+        return self.towerDamage
+
+    def getTowerRadius(self):
+        return self.towerRadius
 
     def getIconPath(self):
         return self.iconPath
