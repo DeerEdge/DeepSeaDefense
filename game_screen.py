@@ -133,12 +133,18 @@ def game_redrawAll(app):
 
 def spawnEnemies(app):
     if app.round in levels:
-        numMonsters = levels[app.round].get("monsters")
-        for i in range(numMonsters):
-            enemy = Serpent(app.startCoord, app.startCoord, app.coordsList[1])
-            app.toBeSpawnedList.append(enemy)
+        level_monsters = levels[app.round]
+
+        for monster_type, count in level_monsters.items():
+            for i in range(count):
+                if monster_type == "serpents":
+                    enemy = Serpent(app.startCoord, app.startCoord, app.coordsList[1])
+                elif monster_type == "slithers":
+                    enemy = Slither(app.startCoord, app.startCoord, app.coordsList[1])
+                app.toBeSpawnedList.append(enemy)
 
 def game_onStep(app):
+    # If the health of defenses reach 0, the game is over
     if app.defenseHealth <= 0:
         app.gameOver = True
         app.roundStarted = False
@@ -159,13 +165,6 @@ def game_onStep(app):
     if app.roundStarted == False:
         return
 
-    # Get and set the positions of the enemies after they move
-    if app.spawnedEnemiesList != []:
-        for enemy in app.spawnedEnemiesList:
-            currentPosition = enemy.getPosition()
-            newPosition = getNextPosition(app, currentPosition, enemy)
-            enemy.setPosition(newPosition)
-
     # Controls the spawning of enemies
     if app.roundStarted and app.toBeSpawnedList != []:
         app.enemySpawnTimer += 1
@@ -173,6 +172,11 @@ def game_onStep(app):
             app.spawnedEnemiesList.append(app.toBeSpawnedList.pop(0))
             app.enemySpawnTimer = 0
 
+    manageTowers(app)
+    manageProjectiles(app)
+    manageEnemies(app)
+
+def manageTowers(app):
     for tower in app.spawnedTowersList:
         tower.reduceCooldown()
         if tower.canAttack():
@@ -189,6 +193,7 @@ def game_onStep(app):
                     tower.startCooldown()
                     break
 
+def manageProjectiles(app):
     for projectile in app.projectilesList:
         if projectile.isAlive:
             projectilePosition = projectile.move()
@@ -201,6 +206,7 @@ def game_onStep(app):
                     app.projectilesList.remove(projectile)
                     break
 
+def manageEnemies(app):
     for enemy in app.spawnedEnemiesList:
         enemy.updateRedCircleEffect()
         if enemy.getHealth() == 0:
@@ -210,23 +216,36 @@ def game_onStep(app):
 
         currentPosition = enemy.getPosition()
         if isEnemyAtEnd(app, currentPosition):
-            app.defenseHealth -= 10
+            enemyDamage = enemy.getDamage()
+            app.defenseHealth -= enemyDamage
             app.spawnedEnemiesList.remove(enemy)
+        else:
+            newPosition = getNextPosition(app, currentPosition, enemy)
+            enemy.setPosition(newPosition)
 
 def getNextPosition(app, currentPosition, enemy):
     previousCoord = enemy.getPreviousCoord()
     targetCoord = enemy.getTargetCoord()
     distance = getDistance(currentPosition, targetCoord)
-    stepSize = 10
+    movementType = enemy.getMovementType()
+    enemySpeed = enemy.getSpeed()
+    stepSize = enemySpeed/100
 
-    if distance < 2:
+    if distance < 20:
         previousCoord = targetCoord
         targetCoord = app.coordsList[app.coordsList.index(targetCoord)+1]
         enemy.setPreviousCoord(previousCoord)
         enemy.setTargetCoord(targetCoord)
 
-    return (currentPosition[0] + (targetCoord[0]-currentPosition[0])/stepSize, currentPosition[1] +
-            (targetCoord[1]-currentPosition[1])/stepSize)
+    if movementType == "linear":
+        print("dist", distance)
+        changeX = (targetCoord[0]-previousCoord[0])*stepSize
+        changeY = (targetCoord[1]-previousCoord[1])*stepSize
+        return (currentPosition[0] + changeX, currentPosition[1] + changeY)
+    elif movementType == "logarithmic":
+        changeX = (targetCoord[0]-currentPosition[0])*stepSize
+        changeY = (targetCoord[1]-currentPosition[1])*stepSize
+        return (currentPosition[0] + changeX, currentPosition[1] + changeY)
 
 
 def game_onMousePress(app, mouseX, mouseY):
@@ -271,7 +290,7 @@ def game_onMousePress(app, mouseX, mouseY):
 
 def isEnemyAtEnd(app, currentPosition):
     endCoord = app.coordsList[-1]
-    if getDistance(currentPosition, endCoord) <= 10:
+    if getDistance(currentPosition, endCoord) <= 20:
         return True
     else:
         return False
