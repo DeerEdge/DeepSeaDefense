@@ -30,24 +30,42 @@ def game_onScreenActivate(app):
     app.gameOver = False
     app.towersPlaced = 0
     app.enemiesDefeated = 0
+    app.score = 0
 
 def game_redrawAll(app):
     # drawLabel('Started', app.width // 2, app.height // 5, size=80, font="monospace", bold=True)
     # Board drawing
-    drawRect(10, 10, 790, 590, fill='white', border='black', borderWidth=2)
-    drawRect(12, 12, 786, 586, fill=rgb(0, 79, 180))
-    drawLabel('Towers', 900, 30, size=30, font="monospace", bold=True)
-    drawLabel('Towers', 900, 30, size=30, font="monospace", bold=True)
+    drawRect(0, 0, 1000, 700, fill=rgb(170, 123, 70))
+    drawRect(5, 5, 990, 690, fill=rgb(188, 146, 87))
+    drawImage("assets/images/game_screen/wood_background.jpg", 0, 0, width=1000, height=700)
+    # drawRect(0, 0, 1000, 700, fill=rgb(188, 146, 87))
+    # drawRect(5, 5, 990, 690, fill=rgb(170, 123, 70))
+    drawRect(10, 50, 790, 590, fill='white', border='black', borderWidth=2)
+    drawRect(12, 52, 786, 586, fill=rgb(0, 79, 180))
+    drawLabel('Towers', 900, 30, size=30, bold=True, fill='white')
+    # drawLabel('Towers', 900, 30, size=30, font="monospace", bold=True)
 
     # Currency and defense health labels
-    drawLabel(f"Currency: ${app.currency}", 20, 20, size=20, fill="white", align="left", bold=True)
-    drawLabel(f"Defense Health: {app.defenseHealth}%", 20, 50, size=20, fill="white", align="left", bold=True)
+    heart_icon_path = "assets/images/game_screen/heart_icon.jpg"
+    drawImage(heart_icon_path, 20, 15, width=30, height=30)
+    drawLabel(f"{app.defenseHealth}", 55, 30, size=25, fill="white", align="left", bold=True)
+    cash_icon_path = "assets/images/game_screen/dollar.png"
+    drawImage(cash_icon_path, 120, 15, width=30, height=30)
+    drawLabel(f"${app.currency}k", 160, 30, size=25, fill="white",font='grenze', align="left", bold=True)
+    star_icon_path = "assets/images/game_screen/star_icon.png"
+    drawImage(star_icon_path, 260, 15, width=30, height=30)
+    drawLabel(f"{app.score}", 300, 30, size=25, fill="white", align="left", bold=True)
 
     # Tower store drawing
     for posX in range(2):
-        for posY in range(6):
+        for posY in range(5):
             drawRect(810 + posX*90, 50 + posY*90, 85, 85, fill='white', border='black', borderWidth=2)
             drawImage("assets/images/towers/patrol_tower.png", 812 + posX*90, 52 + posY*90, width=81, height=81)
+
+    drawCircle(900, 600, 90, fill=rgb(38, 138, 87), border="limeGreen", align="center", borderWidth=2, opacity=100)
+
+    drawRect(10, app.height - 50, 150, 40, fill='red', border='black', borderWidth=2)
+    drawLabel("Quit Game", 85, app.height - 30, size=20, fill='white', bold=True)
 
     # Draw line path
     if len(app.coordsList) > 1:
@@ -57,7 +75,7 @@ def game_redrawAll(app):
 
     # Before the round starts, show a greyed out screen with Start Button
     if app.preRound:
-        drawRect(10, 10, 980, 650, fill='gray', opacity=50)
+        drawRect(0, 0, 1000, 700, fill='gray', opacity=50)
         drawRect(app.width//2 - 100, app.height//2 - 40, 200, 80, fill='white', border='black', borderWidth=2)
         drawLabel('Start Round', app.width//2, app.height//2, size=20, bold=True)
 
@@ -70,7 +88,6 @@ def game_redrawAll(app):
         currentPosition = enemy.getPosition()
         enemyIcon = enemy.getIconPath()
         enemyHealthBarValue = enemy.getHealth()/type(enemy).healthPoints
-        print(enemyHealthBarValue, enemy.getHealth())
         drawRect(currentPosition[0]-20, currentPosition[1] - 35, 40, 5, fill='crimson', align='left')
         drawRect(currentPosition[0]-20, currentPosition[1] - 35, 40*enemyHealthBarValue+0.0001, 5, fill='limeGreen', align='left')
         drawImage(enemyIcon, currentPosition[0], currentPosition[1], width=50, height=50, align='center')
@@ -221,6 +238,10 @@ def game_onMousePress(app, mouseX, mouseY):
         app.roundStarted = True
         spawnEnemies(app)
 
+    if isWithinRect(10, app.height - 50, 150, 40, mouseX, mouseY):
+        app.gameOver = True
+        app.roundStarted = False
+
     for tower in app.spawnedTowersList:
         towerX, towerY = tower.getPosition()
         if isWithinRect(towerX, towerY, 50, 50, mouseX, mouseY):
@@ -246,6 +267,7 @@ def game_onMousePress(app, mouseX, mouseY):
         app.currency -= tower.towerCost
         app.towersPlaced += 1
         app.selectedTower = None
+
 
 def isEnemyAtEnd(app, currentPosition):
     endCoord = app.coordsList[-1]

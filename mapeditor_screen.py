@@ -45,7 +45,7 @@ def mapeditor_onMousePress(app, mouseX, mouseY):
         print("Added point:", (mouseX, mouseY))
 
     elif app.backButton.containsPoint(mouseX, mouseY):
-        setActiveScreen('title') 
+        setActiveScreen('title')
 
 def mapeditor_onMouseMove(app, mouseX, mouseY):
     app.pointerLocation = (mouseX, mouseY)
