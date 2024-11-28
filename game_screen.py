@@ -10,7 +10,8 @@ def game_onScreenActivate(app):
     app.pointerLocation = (0, 0)
     app.spawnedEnemiesList = []
     app.toBeSpawnedList = []
-    app.allTowers = [Patrol_Tower]
+    app.allTowers = [Patrol_Tower, Laser_Turret, Magic_Portal, Tesla_Coil, Missile_Mech, Pulsar_Tower, Submarine,
+                     Tooth_Trap, Monster_Net, Resource_Mine]
     app.spawnedTowersList = []
     app.projectilesList = []
     app.roundStarted = False
@@ -60,7 +61,8 @@ def game_redrawAll(app):
     for posX in range(2):
         for posY in range(5):
             drawRect(810 + posX*90, 50 + posY*90, 85, 85, fill='white', border='black', borderWidth=2)
-            drawImage("assets/images/towers/patrol_tower.png", 812 + posX*90, 52 + posY*90, width=81, height=81)
+            icon_path = app.allTowers[posX*5 + posY].iconPath
+            drawImage(icon_path, 812 + posX*90, 52 + posY*90, width=81, height=81)
 
     drawCircle(900, 600, 90, fill=rgb(38, 138, 87), border="limeGreen", align="center", borderWidth=2, opacity=100)
 

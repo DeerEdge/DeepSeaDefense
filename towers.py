@@ -8,7 +8,7 @@ class Tower:
         return self.position
 
 class Patrol_Tower(Tower):
-    iconPath = "assets/images/towers/patrol_tower.png"
+    iconPath = "assets/images/towers/patrol-tower.png"
     initialTowerRadius = 100
     tiers = {1: ["bullet", 1, 100, 100],
              2: ["bullet", 3, 100, 300],
@@ -18,7 +18,7 @@ class Patrol_Tower(Tower):
 
     def __init__(self, position, name="Patrol_Tower"):
         super().__init__(name, position)
-        self.iconPath = "assets/images/towers/patrol_tower.png"
+        self.iconPath = "assets/images/towers/patrol-tower.png"
         self.tier = Patrol_Tower.tiers.get(self.level)
         self.towerRadius = self.tier[2]
         self.towerDamage = self.tier[3]
@@ -63,3 +63,31 @@ class Patrol_Tower(Tower):
 
     def getIconPath(self):
         return self.iconPath
+
+class Laser_Turret(Tower):
+    iconPath = "assets/images/towers/laser-turret.png"
+
+class Magic_Portal(Tower):
+    iconPath = "assets/images/towers/magic-portal.png"
+
+class Tesla_Coil(Tower):
+    iconPath = "assets/images/towers/tesla-coil.png"
+
+class Resource_Mine(Tower):
+    iconPath = "assets/images/towers/resource-mine.png"
+
+class Missile_Mech(Tower):
+    iconPath = "assets/images/towers/missile-mech.png"
+
+class Pulsar_Tower(Tower):
+    iconPath = "assets/images/towers/pulsar-tower.png"
+
+class Submarine(Tower):
+    iconPath = "assets/images/towers/submarine.png"
+
+class Tooth_Trap(Tower):
+    iconPath = "assets/images/towers/tooth-trap.png"
+
+class Monster_Net(Tower):
+    iconPath = "assets/images/towers/monster-net.png"
+
