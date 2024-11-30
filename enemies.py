@@ -10,6 +10,7 @@ class Monster:
         self.damage = None
         self.killScore = None
 
+
     def getKillScore(self):
         return self.killScore
 
