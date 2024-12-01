@@ -9,7 +9,13 @@ class Monster:
         self.speed = None
         self.damage = None
         self.killScore = None
+        self.isCaught = False
 
+    def getIsCaught(self):
+        return self.isCaught
+
+    def setIsCaught(self, boolState):
+        self.isCaught = boolState
 
     def getKillScore(self):
         return self.killScore

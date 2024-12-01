@@ -1,3 +1,4 @@
+import random as rand
 from cmu_graphics import *
 from check_functions import *
 from enemies import *
@@ -148,7 +149,6 @@ def spawnEnemies(app):
                 app.toBeSpawnedList.append(enemy)
 
 def game_onStep(app):
-    print(app.projectilesList)
     # If the health of defenses reach 0, the game is over
     if app.defenseHealth <= 0:
         app.gameOver = True
@@ -212,6 +212,8 @@ def manageTowers(app):
                         tower.doAction(enemy)
             else:
                 app.spawnedTowersList.remove(tower)
+            if type(tower) == Monster_Net:
+                tower.reduceHoldingDuration()
 
 def manageProjectiles(app):
     print("curr:", app.projectilesList)
@@ -256,6 +258,9 @@ def manageEnemies(app):
             enemy.setPosition(newPosition)
 
 def getNextPosition(app, currentPosition, enemy):
+    if enemy.getIsCaught():
+        return currentPosition
+
     previousCoord = enemy.getPreviousCoord()
     targetCoord = enemy.getTargetCoord()
     distance = getDistance(currentPosition, targetCoord)
@@ -278,6 +283,11 @@ def getNextPosition(app, currentPosition, enemy):
         changeY = (targetCoord[1]-currentPosition[1])*stepSize
         return (currentPosition[0] + changeX, currentPosition[1] + changeY)
 
+def enemyShift(app, currentPosition):
+    posX, posY = currentPosition
+    shiftX = rand.randint(-5, 5)
+    shiftY = rand.randint(-5, 5)
+    return (posX + shiftX, posY + shiftY)
 
 def game_onMousePress(app, mouseX, mouseY):
     app.pointerColor = "lightgreen"

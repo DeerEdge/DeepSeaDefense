@@ -221,11 +221,11 @@ class Submarine(Tower):
 # Takes a set amount of health from N number of monsters
 class Tooth_Trap(Tower):
     iconPath = "assets/images/towers/tooth-trap.png"
-    initialTowerRadius = 100
+    initialTowerRadius = 25
     #           RADIUS DAMAGE NUM_TARGETS
-    tiers = {1: [50, 200, 10],
-             2: [50, 300, 15],
-             3: [100, 450, 20]}
+    tiers = {1: [25, 200, 10],
+             2: [25, 300, 15],
+             3: [50, 450, 20]}
     towerCost = 100
     upgradeCosts = {2: 150, 3: 300}
 
@@ -249,26 +249,57 @@ class Tooth_Trap(Tower):
             self.isActive = False
 
     def getIsActive(self):
-        return self.isActive
+            return self.isActive
 
-
+# Slows enemies
 class Monster_Net(Tower):
     iconPath = "assets/images/towers/monster-net.png"
-    initialTowerRadius = 100
-    tiers = {1: [Bullet, 1, 100, 100],
-             2: [Bullet, 3, 100, 300],
-             3: [Bullet, 4, 200, 450]}
+    initialTowerRadius = 25
+    #           RADIUS NUM_TARGETS
+    tiers = {1: [25, 5],
+             2: [25, 7],
+             3: [50, 10]}
     towerCost = 100
     upgradeCosts = {2: 150, 3: 300}
 
     def __init__(self, position, name="Monster_Net"):
         super().__init__(name, position)
         self.iconPath = "assets/images/towers/monster-net.png"
-        self.tier = Patrol_Tower.tiers.get(self.level)
-        self.towerRadius = self.tier[2]
-        self.towerDamage = self.tier[3]
-        self.cooldownDuration = 2
-        self.cooldown = 0
-        self.cost = 100
+        self.tier = Monster_Net.tiers.get(self.level)
+        self.towerRadius = self.tier[0]
+        self.numMaxTargets = self.tier[1]
+        self.attackedList = []
+        self.enemyDurationHoldingList = []
+        self.holdingDuration = 0.3
+        self.isActive = True
+        self.maxReached = False
+        self.cost = 200
         self.towerType = "static"
 
+    def doAction(self, enemy):
+        if not self.maxReached and len(self.attackedList) != self.numMaxTargets:
+            if enemy not in self.attackedList:
+                self.attackedList.append(enemy)
+                self.enemyDurationHoldingList.append(self.holdingDuration * 15)
+                enemy.setIsCaught(True)
+        elif len(self.attackedList) == self.numMaxTargets:
+            self.maxReached = True
+        elif self.maxReached:
+            if len(self.enemyDurationHoldingList) > 0:
+                pass
+            else:
+                self.isActive = False
+
+    def reduceHoldingDuration(self):
+        print(self.attackedList)
+        print(self.enemyDurationHoldingList)
+        if len(self.enemyDurationHoldingList) > 0:
+            if self.enemyDurationHoldingList[0] <= 0:
+                self.enemyDurationHoldingList.pop(0)
+                self.attackedList[0].setIsCaught(False)
+                self.attackedList.pop(0)
+            else:
+                self.enemyDurationHoldingList[0] -= 1
+
+    def getIsActive(self):
+        return self.isActive
