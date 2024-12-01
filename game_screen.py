@@ -56,6 +56,7 @@ def game_redrawAll(app):
     star_icon_path = "assets/images/game_screen/star_icon.png"
     drawImage(star_icon_path, 260, 15, width=30, height=30)
     drawLabel(f"{app.score}", 300, 30, size=25, fill="white", align="left", bold=True)
+    drawLabel(f"Pointer Location: {app.pointerLocation}", 610, 40, size=15, fill="white", align="left", bold=True)
 
     # Tower store drawing
     for posX in range(2):
@@ -66,7 +67,7 @@ def game_redrawAll(app):
 
     drawCircle(900, 600, 90, fill=rgb(38, 138, 87), border="limeGreen", align="center", borderWidth=2, opacity=100)
 
-    drawRect(10, app.height - 50, 150, 40, fill='red', border='black', borderWidth=2)
+    drawRect(10, 650, 150, 40, fill='red', border='black', borderWidth=2)
     drawLabel("Quit Game", 85, app.height - 30, size=20, fill='white', bold=True)
 
     # Draw line path
@@ -86,6 +87,12 @@ def game_redrawAll(app):
         drawLabel(f"Round {app.round}", app.width//2, app.height//3, size=50, bold=True, fill=rgb(223, 181, 72),
                   border='yellow', borderWidth=2)
 
+    for tower in app.spawnedTowersList:
+        currentPosition = tower.getPosition()
+        towerIcon = tower.getIconPath()
+        drawImage(towerIcon, currentPosition[0], currentPosition[1], width=50, height=50, align='center')
+        drawLabel(f"Lvl. {tower.level}", currentPosition[0], currentPosition[1]-40, size=12, fill="white")
+
     for enemy in app.spawnedEnemiesList:
         currentPosition = enemy.getPosition()
         enemyIcon = enemy.getIconPath()
@@ -96,12 +103,6 @@ def game_redrawAll(app):
 
         if enemy.redCircleTimer > 0:
             drawCircle(currentPosition[0], currentPosition[1], 10, fill=rgb(160, 0, 0), border='red', borderWidth=3)
-
-    for tower in app.spawnedTowersList:
-        currentPosition = tower.getPosition()
-        towerIcon = tower.getIconPath()
-        drawImage(towerIcon, currentPosition[0], currentPosition[1], width=50, height=50, align='center')
-        drawLabel(f"Lvl. {tower.level}", currentPosition[0], currentPosition[1]-40, size=12, fill="white")
 
     for projectile in app.projectilesList:
         if projectile.isAlive:
@@ -183,21 +184,34 @@ def game_onStep(app):
 
 def manageTowers(app):
     for tower in app.spawnedTowersList:
-        tower.reduceCooldown()
-        if tower.canAttack():
-            for enemy in app.spawnedEnemiesList:
-                enemyPosition = enemy.getPosition()
-                towerPosition = tower.getPosition()
-                distance = getDistance(towerPosition, enemyPosition)
-                towerRadius = tower.getTowerRadius()
+        if tower.getTowerType() == "dynamic":
+            tower.reduceCooldown()
+            if tower.canAttack():
+                for enemy in app.spawnedEnemiesList:
+                    enemyPosition = enemy.getPosition()
+                    towerPosition = tower.getPosition()
+                    distance = getDistance(towerPosition, enemyPosition)
+                    towerRadius = tower.getTowerRadius()
 
-                if distance <= towerRadius:
-                    # Launch a projectile towards the enemy
-                    projectileType = tower.getProjectileType()
-                    projectile = projectileType(towerPosition, enemy, tower.getTowerDamage(), tower)
-                    app.projectilesList.append(projectile)
-                    tower.startCooldown()
-                    break
+                    if distance <= towerRadius:
+                        # Launch a projectile towards the enemy
+                        projectileType = tower.getProjectileType()
+                        projectile = projectileType(towerPosition, enemy, tower.getTowerDamage(), tower)
+                        app.projectilesList.append(projectile)
+                        tower.startCooldown()
+                        break
+        elif tower.getTowerType() == "static":
+            if tower.getIsActive():
+                for enemy in app.spawnedEnemiesList:
+                    enemyPosition = enemy.getPosition()
+                    towerPosition = tower.getPosition()
+                    distance = getDistance(towerPosition, enemyPosition)
+                    towerRadius = tower.getTowerRadius()
+
+                    if distance <= towerRadius:
+                        tower.doAction(enemy)
+            else:
+                app.spawnedTowersList.remove(tower)
 
 def manageProjectiles(app):
     print("curr:", app.projectilesList)
@@ -274,7 +288,7 @@ def game_onMousePress(app, mouseX, mouseY):
         app.roundStarted = True
         spawnEnemies(app)
 
-    if isWithinRect(10, app.height - 50, 150, 40, mouseX, mouseY):
+    if isWithinRect(10, 650, 150, 40, mouseX, mouseY):
         app.gameOver = True
         app.roundStarted = False
 

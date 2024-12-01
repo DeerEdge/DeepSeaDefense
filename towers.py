@@ -7,6 +7,7 @@ class Tower:
         self.position = position
         self.iconPath = None
         self.tier = None
+        self.towerType = "dynamic"
         self.towerRadius = None
         self.towerDamage = None
         self.cooldownDuration = None
@@ -14,6 +15,9 @@ class Tower:
         self.cost = None
         self.projectileType = None
         self.occupied = False
+
+    def getTowerType(self):
+        return self.towerType
 
     def getProjectileType(self):
         return self.projectileType
@@ -82,6 +86,7 @@ class Patrol_Tower(Tower):
 class Laser_Turret(Tower):
     iconPath = "assets/images/towers/laser-turret.png"
     initialTowerRadius = 100
+    #            PROJECTILE NONE RADIUS DAMAGE
     tiers = {1: [Laser, 1, 100, 5],
              2: [Laser, 3, 150, 10],
              3: [Laser, 4, 200, 15]}
@@ -213,24 +218,39 @@ class Submarine(Tower):
         self.cooldown = 0
         self.cost = 100
 
+# Takes a set amount of health from N number of monsters
 class Tooth_Trap(Tower):
     iconPath = "assets/images/towers/tooth-trap.png"
     initialTowerRadius = 100
-    tiers = {1: [Bullet, 1, 100, 100],
-             2: [Bullet, 3, 100, 300],
-             3: [Bullet, 4, 200, 450]}
+    #           RADIUS DAMAGE NUM_TARGETS
+    tiers = {1: [50, 200, 10],
+             2: [50, 300, 15],
+             3: [100, 450, 20]}
     towerCost = 100
     upgradeCosts = {2: 150, 3: 300}
 
     def __init__(self, position, name="Tooth_Trap"):
         super().__init__(name, position)
         self.iconPath = "assets/images/towers/tooth-trap.png"
-        self.tier = Patrol_Tower.tiers.get(self.level)
-        self.towerRadius = self.tier[2]
-        self.towerDamage = self.tier[3]
-        self.cooldownDuration = 2
-        self.cooldown = 0
-        self.cost = 100
+        self.tier = Tooth_Trap.tiers.get(self.level)
+        self.towerRadius = self.tier[0]
+        self.towerDamage = self.tier[1]
+        self.numMaxTargets = self.tier[2]
+        self.attackedList = []
+        self.isActive = True
+        self.cost = 200
+        self.towerType = "static"
+
+    def doAction(self, enemy):
+        if enemy not in self.attackedList:
+            self.attackedList.append(enemy)
+            enemy.setHealth(enemy.getHealth() - self.towerDamage)
+        elif len(self.attackedList) == self.numMaxTargets:
+            self.isActive = False
+
+    def getIsActive(self):
+        return self.isActive
+
 
 class Monster_Net(Tower):
     iconPath = "assets/images/towers/monster-net.png"
@@ -250,4 +270,5 @@ class Monster_Net(Tower):
         self.cooldownDuration = 2
         self.cooldown = 0
         self.cost = 100
+        self.towerType = "static"
 
