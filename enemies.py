@@ -4,7 +4,7 @@ class Monster:
         self.position = position
         self.previousCoord = previousCoord
         self.targetCoord = targetCoord
-        self.redCircleDuration = 0.5
+        self.redCircleDuration = 0.25
         self.redCircleTimer = 0
         self.speed = None
         self.damage = None

@@ -12,6 +12,11 @@ class Tower:
         self.cooldownDuration = None
         self.cooldown = None
         self.cost = None
+        self.projectileType = None
+        self.occupied = False
+
+    def getProjectileType(self):
+        return self.projectileType
 
     def getPosition(self):
         return self.position
@@ -65,6 +70,7 @@ class Patrol_Tower(Tower):
 
     def __init__(self, position, name="Patrol_Tower"):
         super().__init__(name, position)
+        self.projectileType = Bullet
         self.iconPath = "assets/images/towers/patrol-tower.png"
         self.tier = Patrol_Tower.tiers.get(self.level)
         self.towerRadius = self.tier[2]
@@ -76,19 +82,20 @@ class Patrol_Tower(Tower):
 class Laser_Turret(Tower):
     iconPath = "assets/images/towers/laser-turret.png"
     initialTowerRadius = 100
-    tiers = {1: [Bullet, 1, 100, 100],
-             2: [Bullet, 3, 100, 300],
-             3: [Bullet, 4, 200, 450]}
-    towerCost = 100
-    upgradeCosts = {2: 150, 3: 300}
+    tiers = {1: [Laser, 1, 100, 5],
+             2: [Laser, 3, 150, 10],
+             3: [Laser, 4, 200, 15]}
+    towerCost = 200
+    upgradeCosts = {2: 200, 3: 400}
 
     def __init__(self, position, name="Laser_Turret"):
         super().__init__(name, position)
+        self.projectileType = Laser
         self.iconPath = "assets/images/towers/laser-turret.png"
-        self.tier = Patrol_Tower.tiers.get(self.level)
+        self.tier = Laser_Turret.tiers.get(self.level)
         self.towerRadius = self.tier[2]
         self.towerDamage = self.tier[3]
-        self.cooldownDuration = 2
+        self.cooldownDuration = 0
         self.cooldown = 0
         self.cost = 100
 
@@ -126,7 +133,7 @@ class Tesla_Coil(Tower):
         self.tier = Patrol_Tower.tiers.get(self.level)
         self.towerRadius = self.tier[2]
         self.towerDamage = self.tier[3]
-        self.cooldownDuration = 2
+        self.cooldownDuration = 0
         self.cooldown = 0
         self.cost = 100
 

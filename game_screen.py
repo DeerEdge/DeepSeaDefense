@@ -104,8 +104,9 @@ def game_redrawAll(app):
         drawLabel(f"Lvl. {tower.level}", currentPosition[0], currentPosition[1]-40, size=12, fill="white")
 
     for projectile in app.projectilesList:
-        projectilePosition = projectile.getPosition()
-        drawCircle(projectilePosition[0], projectilePosition[1], 5)
+        if projectile.isAlive:
+            projectilePosition = projectile.getPosition()
+            projectile.draw(projectilePosition, 5)
 
     if app.selectedTower != None:
         locationX, locationY = app.pointerLocation[0], app.pointerLocation[1]
@@ -146,6 +147,7 @@ def spawnEnemies(app):
                 app.toBeSpawnedList.append(enemy)
 
 def game_onStep(app):
+    print(app.projectilesList)
     # If the health of defenses reach 0, the game is over
     if app.defenseHealth <= 0:
         app.gameOver = True
@@ -153,6 +155,7 @@ def game_onStep(app):
         return
 
     if app.roundStarted and app.defenseHealth > 0 and app.spawnedEnemiesList == [] and app.toBeSpawnedList == []:
+        app.projectilesList = []
         app.round += 1
         app.roundStarted = False
         if app.round in levels:
@@ -186,32 +189,45 @@ def manageTowers(app):
                 enemyPosition = enemy.getPosition()
                 towerPosition = tower.getPosition()
                 distance = getDistance(towerPosition, enemyPosition)
-                towerRadius =  tower.getTowerRadius()
+                towerRadius = tower.getTowerRadius()
 
                 if distance <= towerRadius:
                     # Launch a projectile towards the enemy
-                    projectile = Bullet(towerPosition, enemy, tower.getTowerDamage())
+                    projectileType = tower.getProjectileType()
+                    projectile = projectileType(towerPosition, enemy, tower.getTowerDamage(), tower)
                     app.projectilesList.append(projectile)
                     tower.startCooldown()
                     break
 
 def manageProjectiles(app):
+    print("curr:", app.projectilesList)
     for projectile in app.projectilesList:
         if projectile.isAlive:
             projectilePosition = projectile.move()
             # Check for collision with enemy
             for enemy in app.spawnedEnemiesList:
-                if getDistance(projectilePosition, enemy.getPosition()) < 25:
+                if type(projectile) in [Bullet] and getDistance(projectilePosition, enemy.getPosition()) < 25:
                     enemy.setHealth(enemy.getHealth() - projectile.damage)
                     # Show red circle when hit
                     enemy.showRedCircleEffect()
                     app.projectilesList.remove(projectile)
                     break
+                elif type(projectile) in [Laser]:
+                    if projectile.getEnemy().getHealth() <= 0 or (getDistance(projectile.getEnemy().getPosition(), projectile.getParentTower().getPosition()) > projectile.getParentTower().getTowerRadius()):
+                        projectile.changeEnemy(app.spawnedEnemiesList, enemy)
+                        if projectile.getEnemy() == None:
+                            app.projectilesList.remove(projectile)
+                        break
+                    else:
+                        projectile.getEnemy().setHealth(projectile.getEnemy().getHealth() - projectile.damage)
+                        # Show red circle when hit
+                        projectile.getEnemy().showRedCircleEffect()
+                        break
 
 def manageEnemies(app):
     for enemy in app.spawnedEnemiesList:
         enemy.updateRedCircleEffect()
-        if enemy.getHealth() == 0:
+        if enemy.getHealth() <= 0:
             app.enemiesDefeated += 1
             app.currency += enemy.getReward()
             app.spawnedEnemiesList.remove(enemy)
@@ -240,7 +256,6 @@ def getNextPosition(app, currentPosition, enemy):
         enemy.setTargetCoord(targetCoord)
 
     if movementType == "linear":
-        print("dist", distance)
         changeX = (targetCoord[0]-previousCoord[0])*stepSize
         changeY = (targetCoord[1]-previousCoord[1])*stepSize
         return (currentPosition[0] + changeX, currentPosition[1] + changeY)
