@@ -49,6 +49,7 @@ def game_redrawAll(app):
     # drawRect(5, 5, 990, 690, fill=rgb(170, 123, 70))
     drawRect(10, 50, 790, 590, fill='white', border='black', borderWidth=2)
     drawRect(12, 52, 786, 586, fill=rgb(0, 79, 180))
+    drawLabel(f"Pointer Location: {app.pointerLocation}", 17, 628, fill="white", size=15, align='left')
     drawLabel('Towers', 900, 30, size=30, bold=True, fill='white')
     # drawLabel('Towers', 900, 30, size=30, font="monospace", bold=True)
 
