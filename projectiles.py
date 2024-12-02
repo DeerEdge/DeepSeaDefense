@@ -37,6 +37,7 @@ class Bullet(Projectile):
     def __init__(self, position, targetEnemy, damage, tower, *args):
         super().__init__(position, targetEnemy, damage, tower)
         self.actionType = "object"
+        self.speed=15
 
     def move(self):
         if self.isAlive == False:

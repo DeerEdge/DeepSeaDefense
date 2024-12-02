@@ -6,6 +6,7 @@ from towers import *
 from projectiles import *
 from levels import *
 from widgets import *
+from special_powers import *
 
 def game_onScreenActivate(app):
     app.pointerColor = "red"
@@ -36,6 +37,7 @@ def game_onScreenActivate(app):
     app.score = 0
     app.backButton = Button("back", 70, 670, 120, 40, "←  Back", fill='midnightBlue', border='black', textFill='white')
     app.quitButton = Button("quit", 196, 670, 120, 40, "Quit Game", fill='red', border='black', textFill='white', borderWidth=2)
+    app.chosenSpecialPower = Missiles(app.spawnedEnemiesList)
 
 def game_redrawAll(app):
     # drawLabel('Started', app.width // 2, app.height // 5, size=80, font="monospace", bold=True)
@@ -50,7 +52,7 @@ def game_redrawAll(app):
     drawLabel('Towers', 900, 30, size=30, bold=True, fill='white')
     # drawLabel('Towers', 900, 30, size=30, font="monospace", bold=True)
 
-    # Currency and defense health labels
+    # Currency, defense health, and round labels
     heart_icon_path = "assets/images/game_screen/heart_icon.jpg"
     drawImage(heart_icon_path, 20, 15, width=30, height=30)
     drawLabel(f"{app.defenseHealth}", 55, 30, size=25, fill="white", align="left", bold=True)
@@ -60,7 +62,9 @@ def game_redrawAll(app):
     star_icon_path = "assets/images/game_screen/star_icon.png"
     drawImage(star_icon_path, 260, 15, width=30, height=30)
     drawLabel(f"{app.score}", 300, 30, size=25, fill="white", align="left", bold=True)
-    drawLabel(f"Pointer Location: {app.pointerLocation}", 610, 40, size=15, fill="white", align="left", bold=True)
+    drawLabel(f"Round {app.round}", 690, 30, size=25, fill="white", align="left", bold=True)
+    drawRect(670, 45, 130, 3, fill='white', align="left")
+
 
     # Tower store drawing
     for posX in range(2):
@@ -69,7 +73,9 @@ def game_redrawAll(app):
             icon_path = app.allTowers[posX*5 + posY].iconPath
             drawImage(icon_path, 812 + posX*90, 52 + posY*90, width=81, height=81)
 
+    # Draw special power
     drawCircle(900, 600, 90, fill=rgb(38, 138, 87), border="limeGreen", align="center", borderWidth=2, opacity=100)
+    app.chosenSpecialPower.draw((900, 600))
 
     # Bottom Buttons
     app.backButton.draw()
@@ -133,6 +139,7 @@ def game_redrawAll(app):
         drawImage(app.selectedTower.iconPath, app.pointerLocation[0]-25, app.pointerLocation[1]-25, width=50, height=50)
 
     if app.roundStarted != True and app.defenseHealth > 0:
+        drawRect(0, 0, 1000, 700, fill='gray', opacity=50)
         drawRect(app.width // 2 - 100, app.height // 2 - 40, 200, 80, fill='gray', border='black', borderWidth=2)
         drawLabel("Start Round", app.width // 2, app.height // 2, size=30, fill='white')
 
@@ -142,7 +149,10 @@ def game_redrawAll(app):
         drawLabel(f"Towers Placed: {app.towersPlaced}", app.width//2, app.height//2 + 20, size=30, fill='white')
         drawLabel(f"Enemies Defeated: {app.enemiesDefeated}", app.width//2, app.height//2 + 60, size=30,
                   fill='white')
-        drawLabel("Press R to Restart", app.width//2, app.height//2 + 120, size=20, fill='lightgray')
+        drawLabel(f"Total Score: {app.score}",app.width // 2, app.height // 2 + 100, size=30,fill='white')
+        drawLabel(f"({app.round-1} Round(s) * 2000 + {app.enemiesDefeated} Enemies Defeated * 100 = {app.score})",
+                  app.width // 2, app.height // 2 + 140, size=20,fill='white')
+        drawLabel("Press R to Restart", app.width//2, app.height//2 + 200, size=20, fill='lightgray')
 
     # Draw Mouse Pointer
     drawCircle(app.pointerLocation[0], app.pointerLocation[1], 5, fill=app.pointerColor)
@@ -304,21 +314,26 @@ def game_onMousePress(app, mouseX, mouseY):
     app.pointerColor = "lightgreen"
 
     if app.roundStarted != True and isWithinRect(app.width//2, app.height//2, 200, 80, mouseX, mouseY):
+        if app.score == 0:
+            app.score += (app.round-1)*2000+app.enemiesDefeated*100
+        else:
+            app.score += 2000 + app.enemiesDefeated * 100
         app.preRound = False
         app.showRoundLabel = True
         app.roundStarted = True
         spawnEnemies(app)
 
     # Check if back button was clicked
-    if isWithinRectTopLeft(86, 670, 150, 40, mouseX, mouseY):
+    if isWithinRect(70, 670, 120, 40, mouseX, mouseY):
         setActiveScreen('title')
 
     # Check if quit button was clicked
-    if isWithinRectTopLeft(200, 670, 150, 40, mouseX, mouseY):
+    if isWithinRect(196, 670, 120, 40, mouseX, mouseY):
         app.gameOver = True
         app.roundStarted = False
 
     for tower in app.spawnedTowersList:
+        print(tower, tower.getPosition())
         towerX, towerY = tower.getPosition()
         if isWithinRect(towerX, towerY, 50, 50, mouseX, mouseY):
             upgradeCost = tower.getUpgradeCost()

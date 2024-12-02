@@ -70,7 +70,7 @@ class Tower:
 class Patrol_Tower(Tower):
     iconPath = "assets/images/towers/patrol-tower.png"
     initialTowerRadius = 100
-    tiers = {1: [Bullet, 1, 100, 100],
+    tiers = {1: [Bullet, 1, 100, 200],
              2: [Bullet, 3, 100, 300],
              3: [Bullet, 4, 200, 450]}
     towerCost = 100
