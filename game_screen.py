@@ -5,6 +5,7 @@ from enemies import *
 from towers import *
 from projectiles import *
 from levels import *
+from widgets import *
 
 def game_onScreenActivate(app):
     app.pointerColor = "red"
@@ -33,6 +34,8 @@ def game_onScreenActivate(app):
     app.towersPlaced = 0
     app.enemiesDefeated = 0
     app.score = 0
+    app.backButton = Button("back", 70, 670, 120, 40, "←  Back", fill='midnightBlue', border='black', textFill='white')
+    app.quitButton = Button("quit", 196, 670, 120, 40, "Quit Game", fill='red', border='black', textFill='white', borderWidth=2)
 
 def game_redrawAll(app):
     # drawLabel('Started', app.width // 2, app.height // 5, size=80, font="monospace", bold=True)
@@ -68,8 +71,9 @@ def game_redrawAll(app):
 
     drawCircle(900, 600, 90, fill=rgb(38, 138, 87), border="limeGreen", align="center", borderWidth=2, opacity=100)
 
-    drawRect(10, 650, 150, 40, fill='red', border='black', borderWidth=2)
-    drawLabel("Quit Game", 85, app.height - 30, size=20, fill='white', bold=True)
+    # Bottom Buttons
+    app.backButton.draw()
+    app.quitButton.draw()
 
     # Draw line path
     if len(app.coordsList) > 1:
@@ -305,7 +309,12 @@ def game_onMousePress(app, mouseX, mouseY):
         app.roundStarted = True
         spawnEnemies(app)
 
-    if isWithinRectTopLeft(10, 650, 150, 40, mouseX, mouseY):
+    # Check if back button was clicked
+    if isWithinRectTopLeft(86, 670, 150, 40, mouseX, mouseY):
+        setActiveScreen('title')
+
+    # Check if quit button was clicked
+    if isWithinRectTopLeft(200, 670, 150, 40, mouseX, mouseY):
         app.gameOver = True
         app.roundStarted = False
 
