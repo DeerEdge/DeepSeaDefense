@@ -193,10 +193,10 @@ def manageTowers(app):
                     distance = getDistance(towerPosition, enemyPosition)
                     towerRadius = tower.getTowerRadius()
 
-                    if distance <= towerRadius:
+                    if tower.getHasProjectile() and distance <= towerRadius:
                         # Launch a projectile towards the enemy
                         projectileType = tower.getProjectileType()
-                        projectile = projectileType(towerPosition, enemy, tower.getTowerDamage(), tower)
+                        projectile = projectileType(towerPosition, enemy, tower.getTowerDamage(), tower, app.coordsList)
                         app.projectilesList.append(projectile)
                         tower.startCooldown()
                         break
@@ -228,7 +228,7 @@ def manageProjectiles(app):
                     enemy.showRedCircleEffect()
                     app.projectilesList.remove(projectile)
                     break
-                elif type(projectile) in [Laser]:
+                elif type(projectile) in [Laser, Light_Ray]:
                     if projectile.getEnemy().getHealth() <= 0 or (getDistance(projectile.getEnemy().getPosition(), projectile.getParentTower().getPosition()) > projectile.getParentTower().getTowerRadius()):
                         projectile.changeEnemy(app.spawnedEnemiesList, enemy)
                         if projectile.getEnemy() == None:

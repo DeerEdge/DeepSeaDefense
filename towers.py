@@ -15,6 +15,10 @@ class Tower:
         self.cost = None
         self.projectileType = None
         self.occupied = False
+        self.hasProjectile = True
+
+    def getHasProjectile(self):
+        return self.hasProjectile
 
     def getTowerType(self):
         return self.towerType
@@ -104,22 +108,26 @@ class Laser_Turret(Tower):
         self.cooldown = 0
         self.cost = 100
 
+# Teleportd enemies back to the start
 class Magic_Portal(Tower):
     iconPath = "assets/images/towers/magic-portal.png"
     initialTowerRadius = 100
-    tiers = {1: [Bullet, 1, 100, 100],
-             2: [Bullet, 3, 100, 300],
-             3: [Bullet, 4, 200, 450]}
+    #            ANIMATION RADIUS DAMAGE NUM_TARGETS
+    tiers = {1: [Light_Ray, 100, 5, 1],
+             2: [Light_Ray, 100, 10, 3],
+             3: [Light_Ray, 200, 15, 5]}
     towerCost = 100
-    upgradeCosts = {2: 150, 3: 300}
+    upgradeCosts = {2: 300, 3: 600}
 
     def __init__(self, position, name="Magic_Portal"):
         super().__init__(name, position)
+        self.projectileType = Light_Ray
         self.iconPath = "assets/images/towers/magic-portal.png"
-        self.tier = Patrol_Tower.tiers.get(self.level)
-        self.towerRadius = self.tier[2]
-        self.towerDamage = self.tier[3]
-        self.cooldownDuration = 2
+        self.tier = Magic_Portal.tiers.get(self.level)
+        self.towerRadius = self.tier[1]
+        self.towerDamage = self.tier[2]
+        self.numMaxTargets = self.tier[3]
+        self.cooldownDuration = 1.5
         self.cooldown = 0
         self.cost = 100
 
