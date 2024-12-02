@@ -77,6 +77,13 @@ def game_redrawAll(app):
             drawLine(app.coordsList[index-1][0], app.coordsList[index-1][1], app.coordsList[index][0],
                      app.coordsList[index][1], lineWidth=20, fill=rgb(5, 89, 185))
 
+    # Draw right-side wall
+    for shiftY in range(61):
+        if shiftY % 5 == 0:
+            drawRect(785, 51 + shiftY*9.63, 14, 10, fill='silver', border='black', borderWidth=1)
+        else:
+            drawRect(790, 51 + shiftY*9.63, 9, 10, fill='gray', border='black', borderWidth=1)
+
     # Before the round starts, show a greyed out screen with Start Button
     if app.preRound:
         drawRect(0, 0, 1000, 700, fill='gray', opacity=50)
