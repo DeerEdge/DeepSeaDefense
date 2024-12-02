@@ -216,7 +216,7 @@ def manageTowers(app):
                 tower.reduceHoldingDuration()
 
 def manageProjectiles(app):
-    print("curr:", app.projectilesList)
+    # print("curr:", app.projectilesList)
     for projectile in app.projectilesList:
         if projectile.isAlive:
             projectilePosition = projectile.move()
@@ -298,7 +298,7 @@ def game_onMousePress(app, mouseX, mouseY):
         app.roundStarted = True
         spawnEnemies(app)
 
-    if isWithinRect(10, 650, 150, 40, mouseX, mouseY):
+    if isWithinRectTopLeft(10, 650, 150, 40, mouseX, mouseY):
         app.gameOver = True
         app.roundStarted = False
 
@@ -311,16 +311,24 @@ def game_onMousePress(app, mouseX, mouseY):
                 tower.upgrade()
                 break
 
+    notFound = True
     if isWithinRectTopLeft(810, 50, 180, 540, mouseX, mouseY):
         if app.selectedTower == None and app.roundStarted == True:
-            for posX in range(2):
-                for posY in range(6):
-                    towerX, towerY = 810 + posX*90, 50 + posY*90
-                    if isWithinRectTopLeft(towerX, towerY, towerX + 85, towerY + 85, mouseX, mouseY):
-                        tower = getSelectedTower(app, posX*6 + posY)
+            for posX in range(0,2):
+                for posY in range(0,6):
+                    towerX, towerY = 812 + posX*90, 52 + posY*90
+                    if isWithinRectTopLeft(towerX, towerY, 81, 81, mouseX, mouseY):
+                        # print(app.allTowers, posX*6 + posY, posX, posY, "-", towerX, towerY, towerX + 81, towerY + 81, mouseX, mouseY)
+                        tower = getSelectedTower(app, posX*5 + posY)
                         if app.currency >= tower.towerCost:
                             app.selectedTower = tower
+                        notFound = False
                         break
+                if notFound:
+                    continue
+                else:
+                    break
+
     elif app.selectedTower != None and isWithinRectTopLeft(10, 10, 790, 590, mouseX, mouseY):
         tower = app.selectedTower((mouseX, mouseY))
         app.spawnedTowersList.append(tower)

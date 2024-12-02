@@ -299,8 +299,6 @@ class Monster_Net(Tower):
                 self.isActive = False
 
     def reduceHoldingDuration(self):
-        print(self.attackedList)
-        print(self.enemyDurationHoldingList)
         if len(self.enemyDurationHoldingList) > 0:
             if self.enemyDurationHoldingList[0] <= 0:
                 self.enemyDurationHoldingList.pop(0)
