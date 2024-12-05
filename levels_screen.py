@@ -22,7 +22,7 @@ def levels_onScreenActivate(app):
     clearGeneratedPath(app)
 
 def clearGeneratedPath(app):
-    clearFile("generated_path.txt")
+    clearFile("paths/generated_path.txt")
 
 def levels_redrawAll(app):
     drawImage("assets/images/game_screen/wood_background.jpg", 0, 0, width=1000, height=700)
@@ -50,43 +50,58 @@ def levels_onMousePress(app, mouseX, mouseY):
         setActiveScreen('title')
 
     if isWithinRect(4 * app.width // 5, 205, 224, 174, mouseX, mouseY):
-        applyMathFuncByLevel(app, "hard", 9)
+        applyMathFuncByLevel(app, "hard", 10, 1.9, 1)
+        setActiveScreen('game')
+    elif isWithinRect(app.width // 2, 205, 224, 174, mouseX, mouseY):
+        applyMathFuncByLevel(app, "medium", 12, 1.5, 20)
+        setActiveScreen('game')
+    elif isWithinRect(app.width // 5, 205, 224, 174, mouseX, mouseY):
+        applyMathFuncByLevel(app, "easy", 15, 1.2, 40)
         setActiveScreen('game')
 
-def applyMathFuncByLevel(app, level, nSubdivisions):
+def applyMathFuncByLevel(app, level, nSubdivisions, turnSharpness, randomnessWeight):
     pointValues = []
     if level == "hard":
         for i in range(nSubdivisions):
             x = i * 2 * math.pi / nSubdivisions
-            pointValues.append((x, sineSquared(x)))
+            pointValues.append((x, sineSquared(x)/2))
+    elif level == "medium":
+        for i in range(nSubdivisions):
+            x = i * 2 * math.pi / nSubdivisions
+            pointValues.append((x, sineSquared(x)/2))
+    elif level == "easy":
+        for i in range(nSubdivisions):
+            x = i * 2 * math.pi / nSubdivisions
+            pointValues.append((x, sineSquared(x)/2))
 
     tangentLines = []
     for i in range(len(pointValues)-1):
         tangentLines.append((pointValues[i+1][1]-pointValues[i][1])/(pointValues[i+1][0]-pointValues[i][0]))
+        tangentLines[-1] = tangentLines[-1]*rand.randint(100, 100*randomnessWeight)/100*rand.randint(-1,1)
 
     print(pointValues, tangentLines)
-    return generatePathBasedOnLevel(app, tangentLines, nSubdivisions)
+    return generatePathBasedOnLevel(app, tangentLines, nSubdivisions, turnSharpness)
 
 def writePathList(coordsList):
     for coord in coordsList:
-        writeLineCoord("generated_path.txt", coord)
+        writeLineCoord("paths/generated_path.txt", coord)
 
-def generatePathBasedOnLevel(app, tangentLines, nSubdivisions, turnSharpness=1, randomnessWeight=1):
-    initialCoord = (20, rand.randint(30, app.gameHeight-30))
+def generatePathBasedOnLevel(app, tangentLines, nSubdivisions, turnSharpness):
+    initialCoord = (20, rand.randint(80, app.gameHeight-80))
     coordsList = []
     coordsList.append(initialCoord)
     print("initital", coordsList)
-    resultPathList = solvePath(app, copy.copy(coordsList), tangentLines, nSubdivisions)
+    resultPathList = solvePath(app, copy.copy(coordsList), tangentLines, nSubdivisions, turnSharpness)
     print(resultPathList)
     writePathList(resultPathList)
 
-def solvePath(app, coordsList, tangentLines, nSubdivisions):
+def solvePath(app, coordsList, tangentLines, nSubdivisions, turnSharpness):
     divisionWidth = app.gameWidth//nSubdivisions
     possibleNextCoords = getPossibleNextCoords(app, coordsList, nSubdivisions, divisionWidth)
-    print(divisionWidth, coordsList, possibleNextCoords)
+    # print(divisionWidth, coordsList, possibleNextCoords)
     lastCoord = coordsList[-1]
     closestPointOnEdge = (12 + app.gameWidth, lastCoord[1])
-    if (getDistance(lastCoord, closestPointOnEdge) < 40):
+    if (getDistance(lastCoord, closestPointOnEdge) < 20):
         lastCoord = coordsList[-1]
         lastCoord = (lastCoord[0]-20,lastCoord[1])
         coordsList.pop()
@@ -96,9 +111,9 @@ def solvePath(app, coordsList, tangentLines, nSubdivisions):
         while len(possibleNextCoords) > 0:
             randomIndex = rand.randint(0, len(possibleNextCoords)-1)
             nextCoord = possibleNextCoords[randomIndex]
-            if canAddCoordToList(nextCoord, coordsList, tangentLines, divisionWidth):
+            if canAddCoordToList(nextCoord, coordsList, tangentLines, divisionWidth, turnSharpness):
                 coordsList.append(nextCoord)
-                solution = solvePath(app, coordsList, tangentLines, nSubdivisions)
+                solution = solvePath(app, coordsList, tangentLines, nSubdivisions, turnSharpness)
                 if solution != None:
                     return solution
                 coordsList.pop()
@@ -106,14 +121,20 @@ def solvePath(app, coordsList, tangentLines, nSubdivisions):
                 possibleNextCoords.pop(randomIndex)
         return None
 
-def canAddCoordToList(nextCoord, coordsList, tangentLines, divisionWidth):
+def canAddCoordToList(nextCoord, coordsList, tangentLines, divisionWidth, turnSharpness):
     previousCoord = coordsList[-1]
     i = len(coordsList)-2
     tangentValue = abs(tangentLines[i])
     xDist = abs(divisionWidth)
-    print(getDistance(previousCoord, nextCoord), xDist + 10*tangentValue, xDist + 20*tangentValue)
-    if xDist + 10*tangentValue <= getDistance(previousCoord, nextCoord) <= xDist*1.1 + 40*tangentValue:
+    print(previousCoord, nextCoord, xDist + 10*tangentValue, getDistance(previousCoord, nextCoord), xDist + 20*tangentValue)
+    if len(coordsList) < 2 and abs(xDist*turnSharpness + 10*tangentValue) <= getDistance(previousCoord, nextCoord) <= abs(xDist*1.1*turnSharpness + 40*tangentValue):
         return True
+    elif len(coordsList) >= 2:
+        secondLastCoord = coordsList[0]
+        previousSlope = getSlope(secondLastCoord, previousCoord)
+        print("--->", previousCoord, nextCoord, previousSlope - tangentValue, getSlope(previousCoord, nextCoord), previousSlope + tangentValue)
+        if previousSlope*turnSharpness - 2*tangentValue <= abs(getSlope(previousCoord, nextCoord)) <= abs(previousSlope*1.3*turnSharpness + 2*tangentValue):
+            return True
     return False
 
 def getPossibleNextCoords(app, coordsList, nSubdivisions, divisionWidth):

@@ -40,3 +40,8 @@ def getDistance(coord1, coord2):
     coord2X, coord2Y = coord2
     distance = ((coord1X - coord2X)**2 + (coord1Y - coord2Y)**2)**0.5
     return distance
+
+def getSlope(coord1, coord2):
+    coord1X, coord1Y = coord1
+    coord2X, coord2Y = coord2
+    return (coord2Y-coord1Y)/(coord2X-coord1X)
