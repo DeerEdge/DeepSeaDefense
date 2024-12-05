@@ -21,6 +21,13 @@ def mapeditor_redrawAll(app):
                  app.coordsList[i][0], app.coordsList[i][1],
                  lineWidth=20, fill=rgb(5, 89, 185))
 
+    # Draw right-side wall
+    for shiftY in range(61):
+        if shiftY % 5 == 0:
+            drawRect(785, 11 + shiftY * 9.63, 14, 10, fill='silver', border='black', borderWidth=1)
+        else:
+            drawRect(790, 11 + shiftY * 9.63, 9, 10, fill='gray', border='black', borderWidth=1)
+
     # Draw right-side of editor
     drawLabel('Edit Map', 900, 32, size=30, bold=True, fill='white')
     drawRect(810, 55, 180, 140, fill='aliceBlue', opacity=80, border='black', borderWidth=2)
@@ -32,17 +39,16 @@ def mapeditor_redrawAll(app):
             icon_path = "assets/images/map_assets/" + app.allAssets[posX*3 + posY]
             drawImage(icon_path, 815 + posX*90, 247 + posY*90, width=81, height=81)
 
-
-
     # Draw buttons
     app.saveButton.draw()
     app.resetButton.draw()
     app.backButton.draw()
 
-    # Draw the pointer
-    drawCircle(app.pointerLocation[0], app.pointerLocation[1], 5, fill='red')
+    # Draw Mouse Pointer
+    drawCircle(app.pointerLocation[0], app.pointerLocation[1], 5, fill=app.pointerColor)
 
 def mapeditor_onMousePress(app, mouseX, mouseY):
+    app.pointerColor = "lightgreen"
     if app.saveButton.containsPoint(mouseX, mouseY):
         with open("sample_paths.txt", "w") as file:
             for coord in app.coordsList:

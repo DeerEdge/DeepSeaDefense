@@ -11,6 +11,10 @@ def isWithinRectTopLeft(topLeftX, topLeftY, width, height, mouseX, mouseY):
         return True
     return False
 
+def clearFile(fileName):
+    file = open(fileName, 'w')
+    return
+
 def writeLineCoord(fileName, coord):
     file = open(fileName, 'a')
     file.write(str(coord) + ' . ')

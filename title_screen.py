@@ -2,6 +2,7 @@ from cmu_graphics import *
 from check_functions import *
 from game_screen import *
 from mapeditor_screen import *
+from levels_screen import *
 
 def onAppStart(app):
     app.color = "blue"
@@ -55,7 +56,7 @@ def title_redrawAll(app):
 def title_onMousePress(app, mouseX, mouseY):
     app.pointerColor = 'lightgreen'
     if isWithinRect(app.width // 2, app.height // 2 - 50, app.width // 4, app.height // 10, mouseX, mouseY):
-        setActiveScreen('game')
+        setActiveScreen('levels')
     elif isWithinRect(app.width // 2, app.height // 2 + 130, app.width // 4, app.height // 10, mouseX, mouseY):
         setActiveScreen('mapeditor')
 

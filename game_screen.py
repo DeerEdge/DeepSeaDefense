@@ -22,7 +22,7 @@ def game_onScreenActivate(app):
     app.showRoundLabel = False
     app.roundLabelTimer = 0
     app.stepsPerSecond = 15
-    app.coordsList = readLineCoords("sample_paths.txt")
+    app.coordsList = readLineCoords("generated_path.txt")
     app.startCoord = app.coordsList[0]
     app.enemySpawnTimer = 0
     app.spawnInterval = 1 # Spawn a monster at every second
@@ -326,7 +326,7 @@ def game_onMousePress(app, mouseX, mouseY):
 
     # Check if back button was clicked
     if isWithinRect(70, 670, 120, 40, mouseX, mouseY):
-        setActiveScreen('title')
+        setActiveScreen('levels')
 
     # Check if quit button was clicked
     if isWithinRect(196, 670, 120, 40, mouseX, mouseY):
