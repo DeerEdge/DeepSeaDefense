@@ -358,7 +358,7 @@ class Resource_Mine(Tower):
             if (type(asset) == Minerals and getDistance(self.getPosition(), asset.getPosition()) < self.getTowerRadius()
                     + asset.getRadius()):
                 self.profitMultiplier *= 1.1
-        self.profit += self.towerProfits*self.profitMultiplier
+        self.profit += int(self.towerProfits*self.profitMultiplier)
 
     def drawAnimation(self):
         if self.cooldown < 40:

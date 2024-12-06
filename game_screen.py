@@ -16,8 +16,7 @@ def game_onScreenActivate(app):
     app.pointerLocation = (0, 0)
     app.spawnedEnemiesList = []
     app.toBeSpawnedList = []
-    app.allTowers = [Patrol_Tower, Laser_Turret, Magic_Portal, Tesla_Coil, Missile_Mech, Pulsar_Tower, Submarine,
-                     Tooth_Trap, Monster_Net, Resource_Mine]
+    app.allTowers = [Patrol_Tower, Laser_Turret, Magic_Portal, Pulsar_Tower, Submarine, Tooth_Trap, Monster_Net, Resource_Mine]
     app.allAssets = [Sea_Cliff, Acid_74, Fog, Minerals, Peaks, Tornado]
     app.spawnedTowersList = []
     app.projectilesList = []
@@ -76,14 +75,14 @@ def game_redrawAll(app):
 
     # Tower store drawing
     for posX in range(2):
-        for posY in range(5):
+        for posY in range(4):
             drawRect(810 + posX*90, 50 + posY*90, 85, 85, fill='white', border='black', borderWidth=2)
-            icon_path = app.allTowers[posX*5 + posY].iconPath
+            icon_path = app.allTowers[posX*4 + posY].iconPath
             drawImage(icon_path, 812 + posX*90,  52 + posY*90, width=81, height=81)
 
     # Draw special power
-    drawCircle(900, 600, 90, fill=rgb(38, 138, 87), border="limeGreen", align="center", borderWidth=2, opacity=100)
-    app.chosenSpecialPower.draw((900, 600))
+    drawRect(898, 528, 180, 230, fill=rgb(38, 138, 87), border="limeGreen", align="center", borderWidth=2, opacity=100)
+    app.chosenSpecialPower.draw((895, 530))
 
     # Bottom Buttons
     app.backButton.draw()
@@ -379,11 +378,11 @@ def game_onMousePress(app, mouseX, mouseY):
     if isWithinRectTopLeft(810, 50, 180, 540, mouseX, mouseY):
         if app.selectedTower == None and app.roundStarted == True:
             for posX in range(0,2):
-                for posY in range(0,6):
+                for posY in range(0,5):
                     towerX, towerY = 812 + posX*90, 52 + posY*90
                     if isWithinRectTopLeft(towerX, towerY, 81, 81, mouseX, mouseY):
                         # print(app.allTowers, posX*6 + posY, posX, posY, "-", towerX, towerY, towerX + 81, towerY + 81, mouseX, mouseY)
-                        tower = getSelectedTower(app, posX*5 + posY)
+                        tower = getSelectedTower(app, posX*4 + posY)
                         if app.currency >= tower.towerCost:
                             app.selectedTower = tower
                         notFound = False
