@@ -125,6 +125,8 @@ def game_redrawAll(app):
         towerIcon = tower.getIconPath()
         drawImage(towerIcon, currentPosition[0], currentPosition[1], width=50, height=50, align='center')
         drawLabel(f"Lvl. {tower.level}", currentPosition[0], currentPosition[1]-40, size=12, fill="white")
+        if type(tower) == Resource_Mine:
+            tower.drawAnimation()
 
     for enemy in app.spawnedEnemiesList:
         currentPosition = enemy.getPosition()
@@ -238,18 +240,28 @@ def manageTowers(app):
                         break
         elif tower.getTowerType() == "static":
             if tower.getIsActive():
-                for enemy in app.spawnedEnemiesList:
-                    enemyPosition = enemy.getPosition()
-                    towerPosition = tower.getPosition()
-                    distance = getDistance(towerPosition, enemyPosition)
-                    towerRadius = tower.getTowerRadius()
+                if type(tower) == Resource_Mine:
+                    tower.reduceCooldown()
+                    if tower.cooldown == 0:
+                        tower.doAction(app.spawnedAssets)
+                        tower.startCooldown()
+                else:
+                    for enemy in app.spawnedEnemiesList:
+                        enemyPosition = enemy.getPosition()
+                        towerPosition = tower.getPosition()
+                        distance = getDistance(towerPosition, enemyPosition)
+                        towerRadius = tower.getTowerRadius()
 
-                    if distance <= towerRadius:
-                        tower.doAction(enemy)
+                        if distance <= towerRadius:
+                            tower.doAction(enemy, app.spawnedAssets)
             else:
                 app.spawnedTowersList.remove(tower)
             if type(tower) == Monster_Net:
                 tower.reduceHoldingDuration()
+            if type(tower) == Resource_Mine:
+                if tower.getProfit() > 0:
+                    app.currency += tower.getProfit()
+                    tower.setProfit(0)
 
 def manageProjectiles(app):
     # print("curr:", app.projectilesList)

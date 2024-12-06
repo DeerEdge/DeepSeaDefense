@@ -1,3 +1,6 @@
+import random as rand
+
+from map_assets import Minerals
 from projectiles import *
 
 class Tower:
@@ -150,24 +153,6 @@ class Tesla_Coil(Tower):
         self.cooldown = 0
         self.cost = 100
 
-class Resource_Mine(Tower):
-    iconPath = "assets/images/towers/resource-mine.png"
-    initialTowerRadius = 100
-    tiers = {1: [Bullet, 1, 100, 100],
-             2: [Bullet, 3, 100, 300],
-             3: [Bullet, 4, 200, 450]}
-    towerCost = 100
-    upgradeCosts = {2: 150, 3: 300}
-
-    def __init__(self, position, name="Resource_Mine"):
-        super().__init__(name, position)
-        self.iconPath = "assets/images/towers/resource-mine.png"
-        self.tier = Patrol_Tower.tiers.get(self.level)
-        self.towerRadius = self.tier[2]
-        self.towerDamage = self.tier[3]
-        self.cooldownDuration = 2
-        self.cooldown = 0
-        self.cost = 100
 
 class Missile_Mech(Tower):
     iconPath = "assets/images/towers/missile-mech.png"
@@ -188,6 +173,7 @@ class Missile_Mech(Tower):
         self.cooldown = 0
         self.cost = 100
 
+
 class Pulsar_Tower(Tower):
     iconPath = "assets/images/towers/pulsar-tower.png"
     initialTowerRadius = 100
@@ -207,6 +193,7 @@ class Pulsar_Tower(Tower):
         self.cooldown = 0
         self.cost = 100
 
+
 class Submarine(Tower):
     iconPath = "assets/images/towers/submarine.png"
     initialTowerRadius = 100
@@ -225,6 +212,7 @@ class Submarine(Tower):
         self.cooldownDuration = 2
         self.cooldown = 0
         self.cost = 100
+
 
 # Takes a set amount of health from N number of monsters
 class Tooth_Trap(Tower):
@@ -249,7 +237,7 @@ class Tooth_Trap(Tower):
         self.cost = 200
         self.towerType = "static"
 
-    def doAction(self, enemy):
+    def doAction(self, enemy, *args):
         if enemy not in self.attackedList:
             self.attackedList.append(enemy)
             enemy.setHealth(enemy.getHealth() - self.towerDamage)
@@ -258,6 +246,7 @@ class Tooth_Trap(Tower):
 
     def getIsActive(self):
             return self.isActive
+
 
 # Slows enemies
 class Monster_Net(Tower):
@@ -284,7 +273,7 @@ class Monster_Net(Tower):
         self.cost = 200
         self.towerType = "static"
 
-    def doAction(self, enemy):
+    def doAction(self, enemy, *args):
         if not self.maxReached and len(self.attackedList) != self.numMaxTargets:
             if enemy not in self.attackedList:
                 self.attackedList.append(enemy)
@@ -309,3 +298,63 @@ class Monster_Net(Tower):
 
     def getIsActive(self):
         return self.isActive
+
+
+# Mines resources and brings in profit
+class Resource_Mine(Tower):
+    iconPath = "assets/images/towers/resource-mine.png"
+    initialTowerRadius = 75
+    #           RADIUS MONEY
+    tiers = {1: [75, 200],
+             2: [75, 400],
+             3: [100, 800]}
+    towerCost = 300
+    upgradeCosts = {2: 600, 3: 1200}
+
+    def __init__(self, position, name="Resource_Mine"):
+        super().__init__(name, position)
+        self.iconPath = "assets/images/towers/resource-mine.png"
+        self.tier = Resource_Mine.tiers.get(self.level)
+        self.towerRadius = self.tier[0]
+        self.towerProfits = self.tier[1]
+        self.cooldownDuration = 7
+        self.cooldown = 0
+        self.cost = 300
+        self.isActive = True
+        self.profitMultiplier = 1
+        self.profit = 0
+        self.towerType = "static"
+
+    def doAction(self, assetsList):
+        for asset in assetsList:
+            if (type(asset) == Minerals and getDistance(self.getPosition(), asset.getPosition()) < self.getTowerRadius()
+                    + asset.getRadius()):
+                self.profitMultiplier *= 1.1
+        self.profit += self.towerProfits*self.profitMultiplier
+
+    def drawAnimation(self):
+        if self.cooldown < 40:
+            drawRect(self.position[0], self.position[1], 50, 50, fill='limegreen', opacity=(40-self.cooldown)*2.2,
+                     align='center')
+            drawStar(self.position[0]+rand.randint(30, 40), self.position[1]-rand.randint(5,10), 10, 10,
+                     fill='blueViolet',align='center', rotateAngle=90)
+            drawStar(self.position[0]-rand.randint(30, 40), self.position[1] -rand.randint(10,25), 10, 10,
+                     fill='blueViolet', align='center',
+                     rotateAngle=90)
+
+    def upgrade(self):
+        if self.level < len(self.tiers):
+            self.level += 1
+            self.tier = self.tiers[self.level]
+            self.towerRadius = self.tier[0]
+            self.towerProfits = self.tier[1]
+
+    def getProfit(self):
+        return self.profit
+
+    def setProfit(self, amount):
+        self.profit = amount
+
+    def getIsActive(self):
+        return self.isActive
+
