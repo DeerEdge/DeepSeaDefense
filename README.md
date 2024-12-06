@@ -28,3 +28,5 @@ To play the game, click on the Start Game! button on the title screen and choose
 To create your own maps, click on the Map Editor button on the title screen. Here you can draw the enemy path by clicking in the playable box (blue area). You can also add assets by simply clicking on them and placing. You can toggle to edit different maps as well! Just choose which one you would like to edit!
 
 Now, its time to stop those monsters. Good luck general!
+
+Github Link: https://github.com/DeerEdge/DeepSeaDefense
