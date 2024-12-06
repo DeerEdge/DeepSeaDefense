@@ -23,7 +23,7 @@ There are 4 unique map assets that may appear while you play:
  - Tornado: Mother nature is fighting with us! Tornadoes hurt the monsters as they come in range!
  - Fog: We can't see the monsters when they go into the fog!
 
-To play the game, click on the Start Game! button on the title screen and choose a level! You can choose from generated levels with easy, medium, or hard level of difficulty, or play your own custom maps! When the game loads, press start round and start placing towers! If you lose all of your hearts, the game ends. Remember, towers can be upgraded by pressing on them once they have been constructed in the playable area. Don't forget to utilize your missiles once per round to kill those enemies!
+To play the game, click on the Start Game! button on the title screen and choose a level! You can choose from generated levels with easy, medium, or hard level of difficulty, or play your own custom maps! When the game loads, press start round and start placing towers! If you lose all of your hearts, the game ends. Remember, towers can be upgraded by pressing on them once they have been constructed in the playable area. Don't forget to utilize your missiles once per round to kill those enemies! (Missiles can only be activated when 5 or more enemies are on the board)
 
 To create your own maps, click on the Map Editor button on the title screen. Here you can draw the enemy path by clicking in the playable box (blue area). You can also add assets by simply clicking on them and placing. You can toggle to edit different maps as well! Just choose which one you would like to edit!
 
