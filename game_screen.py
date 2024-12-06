@@ -1,6 +1,7 @@
 import random as rand
 from cmu_graphics import *
 from check_functions import *
+import mapeditor_screen
 from enemies import *
 from towers import *
 from projectiles import *
@@ -22,8 +23,6 @@ def game_onScreenActivate(app):
     app.showRoundLabel = False
     app.roundLabelTimer = 0
     app.stepsPerSecond = 15
-    app.coordsList = readLineCoords("paths/generated_path.txt")
-    app.startCoord = app.coordsList[0]
     app.enemySpawnTimer = 0
     app.spawnInterval = 1 # Spawn a monster at every second
     app.redCircleTimer = 0
@@ -38,6 +37,9 @@ def game_onScreenActivate(app):
     app.backButton = Button("back", 70, 670, 120, 40, "←  Back", fill='midnightBlue', border='black', textFill='white')
     app.quitButton = Button("quit", 196, 670, 120, 40, "Quit Game", fill='red', border='black', textFill='white', borderWidth=2)
     app.chosenSpecialPower = Missiles(app.spawnedEnemiesList)
+    app.chosenPath = readLine("paths/chosen_path.txt")
+    app.coordsList = readLineCoords(app.chosenPath)
+    app.startCoord = app.coordsList[0]
 
 def game_redrawAll(app):
     # drawLabel('Started', app.width // 2, app.height // 5, size=80, font="monospace", bold=True)
@@ -71,7 +73,7 @@ def game_redrawAll(app):
         for posY in range(5):
             drawRect(810 + posX*90, 50 + posY*90, 85, 85, fill='white', border='black', borderWidth=2)
             icon_path = app.allTowers[posX*5 + posY].iconPath
-            drawImage(icon_path, 812 + posX*90, 52 + posY*90, width=81, height=81)
+            drawImage(icon_path, 812 + posX*90,  52 + posY*90, width=81, height=81)
 
     # Draw special power
     drawCircle(900, 600, 90, fill=rgb(38, 138, 87), border="limeGreen", align="center", borderWidth=2, opacity=100)

@@ -21,6 +21,24 @@ def clearFile(fileName):
     file = open(fileName, 'w')
     return
 
+def writeObjectsAndAttributes(fileName, objectName, position, radius, color, borderColor):
+    file = open(fileName, 'a')
+    file.write(str(["NAME:"+objectName, "POSITION:("+str(position[0])+"|"+str(position[1])+")", "RADIUS:"+str(radius), "COLOR:"+str(color),
+                    "BORDERCOLOR:"+str(borderColor)]) + ' . ')
+    file.close()
+
+def writeLine(fileName, text):
+    clearFile(fileName)
+    file = open(fileName, 'a')
+    file.write(str(text))
+    file.close()
+
+def readLine(fileName):
+    file = open(fileName, 'r')
+    contents = file.read()
+    file.close()
+    return contents
+
 def writeLineCoord(fileName, coord):
     file = open(fileName, 'a')
     file.write(str(coord) + ' . ')
@@ -51,3 +69,34 @@ def getSlope(coord1, coord2):
     coord1X, coord1Y = coord1
     coord2X, coord2Y = coord2
     return (coord2Y-coord1Y)/(coord2X-coord1X)
+
+def getAssetsFromFile(fileName):
+    file = open(fileName, 'r')
+    contents = file.read()
+
+    assets = []
+    for assetInfo in contents.split(" . "):
+        print(assetInfo)
+        if not assetInfo.isspace() and assetInfo != '':
+            left = assetInfo.find("[")
+            right = assetInfo.find("]")
+            for parameter in assetInfo.split(","):
+                print(parameter)
+                if "NAME:" in parameter:
+                    assetName = parameter[parameter.find(":")+1:len(parameter)-1]
+                elif "POSITION:" in parameter:
+                    assetPosition = parameter[parameter.find(":")+1:len(parameter)-1]
+                    left = assetPosition.find("(")
+                    comma = assetPosition.find("|")
+                    right = assetPosition.find(")")
+                    x, y = int(assetPosition[left + 1:comma]), int(assetPosition[comma + 1:right])
+                    assetPosition = (x, y)
+                elif "RADIUS:" in parameter:
+                    assetRadius = int(parameter[parameter.find(":") + 1:len(parameter) - 1])
+                elif "BORDERCOLOR:" in parameter:
+                    assetBorderColor = parameter[parameter.find(":")+1:len(parameter)-2]
+                elif "COLOR:" in parameter:
+                    assetColor = parameter[parameter.find(":")+1:len(parameter)-1]
+            assets.append((assetName, assetPosition, assetRadius, assetColor, assetBorderColor))
+
+    return assets

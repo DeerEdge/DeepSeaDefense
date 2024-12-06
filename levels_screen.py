@@ -20,15 +20,16 @@ def levels_onScreenActivate(app):
                                  imageWidth=220, imageHeight=170, border='white', borderWidth=5)
     app.backButton = Button("back", 70, 670, 120, 40, "←  Back", fill='midnightBlue', border='black', textFill='white')
     app.map1Button = Button("easy", app.width // 5, 460, 224, 174, foregroundLabel='Map 1', size=20,
-                            image='assets/images/levels_screen/easyLevelSample.png',
+                            image='assets/images/levels_screen/custom_map_backdrop.png',
                             imageWidth=220, imageHeight=170, border='white', borderWidth=5)
     app.map2Button = Button("easy",  app.width // 2, 460, 224, 174, foregroundLabel='Map 2', size=20,
-                            image='assets/images/levels_screen/easyLevelSample.png',
+                            image='assets/images/levels_screen/custom_map_backdrop.png',
                             imageWidth=220, imageHeight=170, border='white', borderWidth=5)
     app.map3Button = Button("easy", 4 * app.width // 5, 460, 224, 174, foregroundLabel='Map 3', size=20,
-                            image='assets/images/levels_screen/easyLevelSample.png',
+                            image='assets/images/levels_screen/custom_map_backdrop.png',
                             imageWidth=220, imageHeight=170, border='white', borderWidth=5)
     clearGeneratedPath(app)
+    app.chosenPath = ''
 
 def clearGeneratedPath(app):
     clearFile("paths/generated_path.txt")
@@ -62,12 +63,27 @@ def levels_onMousePress(app, mouseX, mouseY):
 
     if isWithinRect(4 * app.width // 5, 205, 224, 174, mouseX, mouseY):
         applyMathFuncByLevel(app, "hard", 10, 1.9, 1)
+        writeLine("paths/chosen_path.txt", "paths/generated_path.txt")
         setActiveScreen('game')
     elif isWithinRect(app.width // 2, 205, 224, 174, mouseX, mouseY):
         applyMathFuncByLevel(app, "medium", 12, 1.5, 20)
+        writeLine("paths/chosen_path.txt", "paths/generated_path.txt")
         setActiveScreen('game')
     elif isWithinRect(app.width // 5, 205, 224, 174, mouseX, mouseY):
         applyMathFuncByLevel(app, "easy", 15, 1.2, 40)
+        writeLine("paths/chosen_path.txt", "paths/generated_path.txt")
+        setActiveScreen('game')
+    elif isWithinRect(4 * app.width // 5, 460, 224, 174, mouseX, mouseY):
+        applyMathFuncByLevel(app, "hard", 10, 1.9, 1)
+        writeLine("paths/chosen_path.txt", "paths/custom_map3.txt")
+        setActiveScreen('game')
+    elif isWithinRect(app.width // 2, 460, 224, 174, mouseX, mouseY):
+        applyMathFuncByLevel(app, "medium", 12, 1.5, 20)
+        writeLine("paths/chosen_path.txt", "paths/custom_map2.txt")
+        setActiveScreen('game')
+    elif isWithinRect(app.width // 5, 460, 224, 174, mouseX, mouseY):
+        applyMathFuncByLevel(app, "easy", 15, 1.2, 40)
+        writeLine("paths/chosen_path.txt", "paths/custom_map1.txt")
         setActiveScreen('game')
 
 def applyMathFuncByLevel(app, level, nSubdivisions, turnSharpness, randomnessWeight):
