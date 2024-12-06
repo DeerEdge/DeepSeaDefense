@@ -150,7 +150,11 @@ def game_redrawAll(app):
         elif app.pointerLocation[0] > 786: locationX = 786
         if app.pointerLocation[1] <= 25: locationY = 25
         elif app.pointerLocation[1] > 586: locationY = 586
-
+        if app.selectedTower.iconPath == "assets/images/towers/submarine.png":
+            drawLine(locationX, locationY - 100, locationX, locationY + 100, fill='red', lineWidth=2)
+            drawLine(locationX, locationY + 100, locationX + 200, locationY + 100, fill='red', lineWidth=2)
+            drawLine(locationX + 200, locationY + 100, locationX + 200, locationY - 100, fill='red', lineWidth=2)
+            drawLine(locationX + 200, locationY - 100, locationX, locationY - 100, fill='red', lineWidth=2)
         drawCircle(locationX, locationY, app.selectedTower.initialTowerRadius, fill=rgb(160, 0, 0), border="red",
                    align="center", borderWidth=2, opacity=40)
         drawImage(app.selectedTower.iconPath, app.pointerLocation[0]-25, app.pointerLocation[1]-25, width=50, height=50)
@@ -224,6 +228,8 @@ def manageTowers(app):
     for tower in app.spawnedTowersList:
         if tower.getTowerType() == "dynamic":
             tower.reduceCooldown()
+            if type(tower) == Submarine:
+                tower.move()
             if tower.canAttack():
                 for enemy in app.spawnedEnemiesList:
                     enemyPosition = enemy.getPosition()

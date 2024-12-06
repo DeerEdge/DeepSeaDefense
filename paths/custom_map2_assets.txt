@@ -1,0 +1,1 @@
+['NAME:Tornado', 'POSITION:(542|494)', 'RADIUS:75', 'COLOR:dimGray', 'BORDERCOLOR:black'] . ['NAME:Minerals', 'POSITION:(318|349)', 'RADIUS:150', 'COLOR:orchid', 'BORDERCOLOR:mediumOrchid'] . 

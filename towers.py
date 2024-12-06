@@ -189,7 +189,7 @@ class Pulsar_Tower(Tower):
         self.tier = Patrol_Tower.tiers.get(self.level)
         self.towerRadius = self.tier[2]
         self.towerDamage = self.tier[3]
-        self.cooldownDuration = 2
+        self.cooldownDuration = 0.1
         self.cooldown = 0
         self.cost = 100
 
@@ -197,9 +197,10 @@ class Pulsar_Tower(Tower):
 class Submarine(Tower):
     iconPath = "assets/images/towers/submarine.png"
     initialTowerRadius = 100
-    tiers = {1: [Bullet, 1, 100, 100],
-             2: [Bullet, 3, 100, 300],
-             3: [Bullet, 4, 200, 450]}
+    #           PROJECTILE    RADIUS DAMAGE
+    tiers = {1: [Bullet, 1, 300, 200],
+             2: [Bullet, 1, 300, 300],
+             3: [Bullet, 1, 400, 400]}
     towerCost = 100
     upgradeCosts = {2: 150, 3: 300}
 
@@ -212,7 +213,34 @@ class Submarine(Tower):
         self.cooldownDuration = 2
         self.cooldown = 0
         self.cost = 100
+        self.boundaries = [(self.position[0],self.position[1]-100), (self.position[0], self.position[1] + 100),
+                           (self.position[0]+200, self.position[1] + 100), (self.position[0]+200, self.position[1]-100)]
+        self.targetCoord = self.boundaries[1]
+        if not isWithinRectTopLeft(self.position[0], self.position[1] - 100, 200, 200, self.targetCoord[0], self.targetCoord[1]):
+            self.targetCoord = (150,250)
+            self.boundaries = [(150, 250), (150, 450), (550, 450), (550, 250)]
+        self.projectileType = Bullet
 
+    def move(self):
+        oldPosition = self.position
+        currentDist = getDistance(self.position, self.targetCoord)
+        for stepX in [-5, 5]:
+            newDist = getDistance((self.position[0]+stepX, self.position[1]), self.targetCoord)
+            if newDist < currentDist:
+                self.position = (self.position[0]+stepX, self.position[1])
+                if getDistance(self.position, self.targetCoord) < 20:
+                    index = (self.boundaries.index(self.targetCoord) + 1) % 4
+                    self.targetCoord = self.boundaries[index]
+                break
+        if oldPosition == self.position:
+            for stepY in [-5, 5]:
+                newDist = getDistance((self.position[0], self.position[1]+stepY), self.targetCoord)
+                if newDist < currentDist:
+                    self.position = (self.position[0], self.position[1]+stepY)
+                    if getDistance(self.position, self.targetCoord) < 20:
+                        index = (self.boundaries.index(self.targetCoord) + 1) % 4
+                        self.targetCoord = self.boundaries[index]
+                    break
 
 # Takes a set amount of health from N number of monsters
 class Tooth_Trap(Tower):

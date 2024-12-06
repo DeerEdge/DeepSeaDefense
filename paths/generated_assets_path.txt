@@ -1,1 +1,1 @@
-['NAME:Fog', 'POSITION:(484|260)', 'RADIUS:100', 'COLOR:silver', 'BORDERCOLOR:dimGray'] . ['NAME:Peaks', 'POSITION:(561|397)', 'RADIUS:100', 'COLOR:tan', 'BORDERCOLOR:burlyWood'] . 
+['NAME:Acid_74', 'POSITION:(345|415)', 'RADIUS:100', 'COLOR:paleGreen', 'BORDERCOLOR:darkRed'] . 
