@@ -1,7 +1,8 @@
 levels = {
     1: {
+        "slithers": 2,
         "serpents": 5,
-        "slithers": 3
+        "slithers": 4
     },
     2: {
         "serpents": 8,

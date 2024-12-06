@@ -12,7 +12,7 @@ def mapeditor_onScreenActivate(app):
     app.resetButton = Button('clear', 900, 155, 150, 50, 'Clear', fill='red', border='black', textFill='white')
     app.undoButton = Button('undo', 900, 215, 150, 50, 'Undo', fill='royalBlue', border='black', textFill='white')
     app.backButton = Button("back", 70, 670, 120, 40, "←  Back", fill='midnightBlue', border='black', textFill='white')
-    app.allAssets = [Sea_Cliff, Acid_74, Fog, Minerals, Peaks, Tornado]
+    app.allAssets = [Acid_74, Fog, Minerals, Tornado]
     app.mapToEdit = "Map 1"
     app.selectedAsset = None
     app.spawnedAssets = unpackAssets(app.mapAssetsPath)
@@ -48,9 +48,9 @@ def mapeditor_redrawAll(app):
 
     drawLabel('Assets', 900, 282, size=30, bold=True, fill='white')
     for posX in range(2):
-        for posY in range(3):
+        for posY in range(2):
             drawRect(813 + posX*90, 305 + posY*90, 85, 85, fill='white', border='black', borderWidth=2)
-            icon_path = app.allAssets[posX*3 + posY].iconPath
+            icon_path = app.allAssets[posX*2 + posY].iconPath
             drawImage(icon_path, 815 + posX*90, 307 + posY*90, width=81, height=81)
 
     # Draw buttons
@@ -174,7 +174,7 @@ def mapeditor_onMousePress(app, mouseX, mouseY):
                 for posY in range(0,4):
                     assetX, assetY = 815 + posX*90, 307 + posY*90
                     if isWithinRectTopLeft(assetX, assetY, 81, 81, mouseX, mouseY):
-                        asset = getSelectedAsset(app, posX * 3 + posY)
+                        asset = getSelectedAsset(app, posX * 2 + posY)
                         app.selectedAsset = asset
                         break
     elif app.selectedAsset != None and isWithinRectTopLeft(10, 10, 790, 590, mouseX, mouseY):

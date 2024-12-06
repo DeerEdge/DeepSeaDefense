@@ -2,10 +2,13 @@ from check_functions import *
 from cmu_graphics import *
 
 class Special_Power:
-    def __init__(self, enemyList):
-        self.targets = enemyList
+    def __init__(self, position, targetEnemy, damage, speed=5):
+        self.position = position
+        self.target = targetEnemy
+        self.damage = damage
+        self.speed = speed
         self.isAlive = True
-        self.hitEnemies = False
+        self.hitEnemy = False
         self.actionType = None
         self.pathCoordsList = None
 
@@ -24,8 +27,9 @@ class Special_Power:
         return self.position
 
 class Missiles(Special_Power):
-    def __init__(self, enemyList, *args):
-        super().__init__(enemyList)
+    def __init__(self, position, targetEnemy, damage, tower, *args):
+        super().__init__(position, targetEnemy, damage, tower)
+        self.speed = 15
 
     def move(self):
         if self.isAlive == False:
@@ -49,3 +53,10 @@ class Missiles(Special_Power):
         drawImage('assets/images/special_powers/missile.png', position[0]-35, position[1]+45, width=90, height=90, align='center')
         drawImage('assets/images/special_powers/missile.png', position[0]-10, position[1]-10, width=120, height=120, align='center')
         drawImage('assets/images/special_powers/missile.png', position[0]+45, position[1]-35, width=90, height=90, align='center')
+
+    def drawIcon(self, position):
+        drawRect(position[0], position[1], 16, 5, fill="silver", border='gray', align='left')
+        drawRect(position[0]+16, position[1], 4, 8, fill = "gray", align = 'left')
+        drawCircle(position[0], position[1], 8, fill="red", border='darkRed')
+        drawRect(position[0]+21, position[1], 10, 5, fill="darkOrange", align='left')
+

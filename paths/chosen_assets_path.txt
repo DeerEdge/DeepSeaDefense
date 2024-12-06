@@ -1,1 +1,1 @@
-paths/custom_map2_assets.txt
+paths/custom_map1_assets.txt

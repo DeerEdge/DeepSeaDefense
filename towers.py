@@ -19,6 +19,16 @@ class Tower:
         self.projectileType = None
         self.occupied = False
         self.hasProjectile = True
+        self.doesAttack = True
+
+    def getDoesAttack(self):
+        return self.doesAttack
+
+    def getLevel(self):
+        return self.level
+
+    def getName(self):
+        return self.name
 
     def getHasProjectile(self):
         return self.hasProjectile
@@ -71,6 +81,7 @@ class Tower:
         return self.iconPath
 
 class Patrol_Tower(Tower):
+    name = "Patrol_Tower"
     iconPath = "assets/images/towers/patrol-tower.png"
     initialTowerRadius = 100
     tiers = {1: [Bullet, 1, 100, 200],
@@ -91,12 +102,13 @@ class Patrol_Tower(Tower):
         self.cost = 100
 
 class Laser_Turret(Tower):
+    name = "Laser_Turret"
     iconPath = "assets/images/towers/laser-turret.png"
     initialTowerRadius = 100
     #            PROJECTILE NONE RADIUS DAMAGE
     tiers = {1: [Laser, 1, 100, 5],
-             2: [Laser, 3, 150, 10],
-             3: [Laser, 4, 200, 15]}
+             2: [Laser, 1, 150, 10],
+             3: [Laser, 1, 200, 15]}
     towerCost = 200
     upgradeCosts = {2: 200, 3: 400}
 
@@ -113,6 +125,7 @@ class Laser_Turret(Tower):
 
 # Teleportd enemies back to the start
 class Magic_Portal(Tower):
+    name = "Magic_Portal"
     iconPath = "assets/images/towers/magic-portal.png"
     initialTowerRadius = 100
     #            ANIMATION RADIUS DAMAGE NUM_TARGETS
@@ -134,52 +147,20 @@ class Magic_Portal(Tower):
         self.cooldown = 0
         self.cost = 100
 
-class Tesla_Coil(Tower):
-    iconPath = "assets/images/towers/tesla-coil.png"
-    initialTowerRadius = 100
-    tiers = {1: [Bullet, 1, 100, 100],
-             2: [Bullet, 3, 100, 300],
-             3: [Bullet, 4, 200, 450]}
-    towerCost = 100
-    upgradeCosts = {2: 150, 3: 300}
-
-    def __init__(self, position, name="Tesla_Coil"):
-        super().__init__(name, position)
-        self.iconPath = "assets/images/towers/tesla-coil.png"
-        self.tier = Patrol_Tower.tiers.get(self.level)
-        self.towerRadius = self.tier[2]
-        self.towerDamage = self.tier[3]
-        self.cooldownDuration = 0
-        self.cooldown = 0
-        self.cost = 100
-
-
-class Missile_Mech(Tower):
-    iconPath = "assets/images/towers/missile-mech.png"
-    initialTowerRadius = 100
-    tiers = {1: [Bullet, 1, 100, 100],
-             2: [Bullet, 3, 100, 300],
-             3: [Bullet, 4, 200, 450]}
-    towerCost = 100
-    upgradeCosts = {2: 150, 3: 300}
-
-    def __init__(self, position, name="Missile_Mech"):
-        super().__init__(name, position)
-        self.iconPath = "assets/images/towers/missile-mech.png"
-        self.tier = Patrol_Tower.tiers.get(self.level)
-        self.towerRadius = self.tier[2]
-        self.towerDamage = self.tier[3]
-        self.cooldownDuration = 2
-        self.cooldown = 0
-        self.cost = 100
-
+    def upgrade(self):
+        if self.level < len(self.tiers):
+            self.level += 1
+            self.tier = self.tiers[self.level]
+            self.towerRadius = self.tier[1]
+            self.towerDamage = self.tier[2]
 
 class Pulsar_Tower(Tower):
+    name = "Pulsar_Tower"
     iconPath = "assets/images/towers/pulsar-tower.png"
     initialTowerRadius = 100
     tiers = {1: [Bullet, 1, 100, 100],
-             2: [Bullet, 3, 100, 300],
-             3: [Bullet, 4, 200, 450]}
+             2: [Bullet, 1, 100, 300],
+             3: [Bullet, 1, 200, 450]}
     towerCost = 100
     upgradeCosts = {2: 150, 3: 300}
 
@@ -195,6 +176,7 @@ class Pulsar_Tower(Tower):
 
 
 class Submarine(Tower):
+    name = "Submarine"
     iconPath = "assets/images/towers/submarine.png"
     initialTowerRadius = 100
     #           PROJECTILE    RADIUS DAMAGE
@@ -210,7 +192,7 @@ class Submarine(Tower):
         self.tier = Patrol_Tower.tiers.get(self.level)
         self.towerRadius = self.tier[2]
         self.towerDamage = self.tier[3]
-        self.cooldownDuration = 2
+        self.cooldownDuration = 0.5
         self.cooldown = 0
         self.cost = 100
         self.boundaries = [(self.position[0],self.position[1]-100), (self.position[0], self.position[1] + 100),
@@ -244,6 +226,7 @@ class Submarine(Tower):
 
 # Takes a set amount of health from N number of monsters
 class Tooth_Trap(Tower):
+    name = "Tooth_Trap"
     iconPath = "assets/images/towers/tooth-trap.png"
     initialTowerRadius = 25
     #           RADIUS DAMAGE NUM_TARGETS
@@ -275,9 +258,18 @@ class Tooth_Trap(Tower):
     def getIsActive(self):
             return self.isActive
 
+    def upgrade(self):
+        if self.level < len(self.tiers):
+            self.level += 1
+            self.tier = self.tiers[self.level]
+            self.towerRadius = self.tier[0]
+            self.towerDamage = self.tier[1]
+            self.numMaxTargets = self.tier[2]
+
 
 # Slows enemies
 class Monster_Net(Tower):
+    name = "Monster_Net"
     iconPath = "assets/images/towers/monster-net.png"
     initialTowerRadius = 25
     #           RADIUS NUM_TARGETS
@@ -300,6 +292,14 @@ class Monster_Net(Tower):
         self.maxReached = False
         self.cost = 200
         self.towerType = "static"
+        self.doesAttack = False
+
+    def upgrade(self):
+        if self.level < len(self.tiers):
+            self.level += 1
+            self.tier = self.tiers[self.level]
+            self.towerRadius = self.tier[0]
+            self.numMaxTargets = self.tier[1]
 
     def doAction(self, enemy, *args):
         if not self.maxReached and len(self.attackedList) != self.numMaxTargets:
@@ -330,6 +330,7 @@ class Monster_Net(Tower):
 
 # Mines resources and brings in profit
 class Resource_Mine(Tower):
+    name = "Resource_Mine"
     iconPath = "assets/images/towers/resource-mine.png"
     initialTowerRadius = 75
     #           RADIUS MONEY
@@ -352,6 +353,7 @@ class Resource_Mine(Tower):
         self.profitMultiplier = 1
         self.profit = 0
         self.towerType = "static"
+        self.doesAttack = False
 
     def doAction(self, assetsList):
         for asset in assetsList:

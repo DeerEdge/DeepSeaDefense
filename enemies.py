@@ -10,6 +10,13 @@ class Monster:
         self.damage = None
         self.killScore = None
         self.isCaught = False
+        self.isVisible = True
+
+    def getVisibilty(self):
+        return self.isVisible
+
+    def setVisibilty(self, state):
+        self.isVisible = state
 
     def getIsCaught(self):
         return self.isCaught

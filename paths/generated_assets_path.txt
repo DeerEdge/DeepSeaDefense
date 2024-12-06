@@ -1,1 +1,0 @@
-['NAME:Tornado', 'POSITION:(218|430)', 'RADIUS:75', 'COLOR:dimGray', 'BORDERCOLOR:black'] . ['NAME:Fog', 'POSITION:(245|352)', 'RADIUS:100', 'COLOR:silver', 'BORDERCOLOR:dimGray'] . ['NAME:Acid_74', 'POSITION:(571|348)', 'RADIUS:100', 'COLOR:paleGreen', 'BORDERCOLOR:darkRed'] . 

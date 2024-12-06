@@ -17,9 +17,11 @@ def game_onScreenActivate(app):
     app.spawnedEnemiesList = []
     app.toBeSpawnedList = []
     app.allTowers = [Patrol_Tower, Laser_Turret, Magic_Portal, Pulsar_Tower, Submarine, Tooth_Trap, Monster_Net, Resource_Mine]
-    app.allAssets = [Sea_Cliff, Acid_74, Fog, Minerals, Peaks, Tornado]
+    app.allAssets = [Acid_74, Fog, Minerals, Tornado]
     app.spawnedTowersList = []
     app.projectilesList = []
+    app.missilesList = []
+    app.canFireMissiles = True
     app.roundStarted = False
     app.preRound = True
     app.showRoundLabel = False
@@ -38,12 +40,16 @@ def game_onScreenActivate(app):
     app.score = 0
     app.backButton = Button("back", 70, 670, 120, 40, "←  Back", fill='midnightBlue', border='black', textFill='white')
     app.quitButton = Button("quit", 196, 670, 120, 40, "Quit Game", fill='red', border='black', textFill='white', borderWidth=2)
-    app.chosenSpecialPower = Missiles(app.spawnedEnemiesList)
     app.chosenPath = readLine("paths/chosen_path.txt")
     app.coordsList = readLineCoords(app.chosenPath)
     app.startCoord = app.coordsList[0]
     app.chosenAssetsPath = readLine("paths/chosen_assets_path.txt")
     app.spawnedAssets = unpackAssets(app.chosenAssetsPath)
+    app.hoverOverCard = False
+    app.hoveringOver = None
+    app.hoveringOverSpawned = False
+    app.towerPosition = (0, 0)
+    app.missilesUsed = False
 
 
 def game_redrawAll(app):
@@ -81,8 +87,17 @@ def game_redrawAll(app):
             drawImage(icon_path, 812 + posX*90,  52 + posY*90, width=81, height=81)
 
     # Draw special power
-    drawRect(898, 528, 180, 230, fill=rgb(38, 138, 87), border="limeGreen", align="center", borderWidth=2, opacity=100)
-    app.chosenSpecialPower.draw((895, 530))
+    if app.missilesUsed == False:
+        drawRect(898, 528, 180, 230, fill=rgb(38, 138, 87), border="limeGreen", align="center", borderWidth=2, opacity=100)
+    else:
+        drawRect(898, 528, 180, 230, fill='salmon', border='darkRed', align="center", borderWidth=2,
+                 opacity=100)
+    drawImage('assets/images/special_powers/missile.png', 898 - 35, 528 + 45, width=90, height=90,
+              align='center')
+    drawImage('assets/images/special_powers/missile.png', 898 - 10, 528 - 10, width=120, height=120,
+              align='center')
+    drawImage('assets/images/special_powers/missile.png', 898 + 45, 528 - 35, width=90, height=90,
+              align='center')
 
     # Bottom Buttons
     app.backButton.draw()
@@ -106,11 +121,6 @@ def game_redrawAll(app):
         drawRect(0, 0, 1000, 700, fill='gray', opacity=50)
         drawRect(app.width//2 - 100, app.height//2 - 40, 200, 80, fill='white', border='black', borderWidth=2)
         drawLabel('Start Round', app.width//2, app.height//2, size=20, bold=True)
-
-    # Show Round # label before round starts
-    if app.showRoundLabel:
-        drawLabel(f"Round {app.round}", app.width//2-100, app.height//5, size=50, bold=True, fill=rgb(223, 181, 72),
-                  border='yellow', borderWidth=2)
 
     for asset in app.spawnedAssets:
         currentPosition = asset.getPosition()
@@ -143,6 +153,11 @@ def game_redrawAll(app):
             projectilePosition = projectile.getPosition()
             projectile.draw(projectilePosition, 5)
 
+    for missile in app.missilesList:
+        if missile.isAlive:
+            missilePosition = missile.getPosition()
+            missile.drawIcon(missilePosition)
+
     if app.selectedTower != None:
         locationX, locationY = app.pointerLocation[0], app.pointerLocation[1]
         if app.pointerLocation[0] <= 25: locationX = 25
@@ -158,10 +173,19 @@ def game_redrawAll(app):
                    align="center", borderWidth=2, opacity=40)
         drawImage(app.selectedTower.iconPath, app.pointerLocation[0]-25, app.pointerLocation[1]-25, width=50, height=50)
 
+    if app.hoverOverCard:
+        drawInfoCard(app, app.hoveringOver, app.hoveringOverSpawned)
+
     if app.roundStarted != True and app.defenseHealth > 0:
         drawRect(0, 0, 1000, 700, fill='gray', opacity=50)
         drawRect(app.width // 2 - 100, app.height // 2 - 40, 200, 80, fill='gray', border='black', borderWidth=2)
         drawLabel("Start Round", app.width // 2, app.height // 2, size=30, fill='white')
+
+    # Show Round # label before round starts
+    if app.showRoundLabel:
+        drawLabel(f"Round {app.round}", app.width // 2 - 100, app.height // 5, size=50, bold=True,
+                  fill=rgb(223, 181, 72),
+                  border='yellow', borderWidth=2)
 
     if app.gameOver:
         drawRect(0, 0, app.width, app.height, fill='black', opacity=50)
@@ -222,6 +246,7 @@ def game_onStep(app):
     manageTowers(app)
     manageProjectiles(app)
     manageEnemies(app)
+    manageMissiles(app)
 
 def manageTowers(app):
     for tower in app.spawnedTowersList:
@@ -236,7 +261,7 @@ def manageTowers(app):
                     distance = getDistance(towerPosition, enemyPosition)
                     towerRadius = tower.getTowerRadius()
 
-                    if tower.getHasProjectile() and distance <= towerRadius:
+                    if tower.getHasProjectile() and distance <= towerRadius and enemy.getVisibilty():
                         # Launch a projectile towards the enemy
                         projectileType = tower.getProjectileType()
                         projectile = projectileType(towerPosition, enemy, tower.getTowerDamage(), tower, app.coordsList)
@@ -309,6 +334,30 @@ def manageEnemies(app):
         else:
             newPosition = getNextPosition(app, currentPosition, enemy)
             enemy.setPosition(newPosition)
+        enemy.setVisibilty(True)
+        for asset in app.spawnedAssets:
+            if asset.getName() == "Acid_74" and getDistance(asset.getPosition(), enemy.getPosition()) < asset.getRadius():
+                enemy.setHealth(enemy.getHealth() + 5)
+                if enemy.getHealth() > type(enemy).healthPoints:
+                    enemy.setHealth(type(enemy).healthPoints)
+            elif asset.getName() == "Tornado" and getDistance(asset.getPosition(), enemy.getPosition()) < asset.getRadius():
+                enemy.setHealth(enemy.getHealth() - 5)
+            elif asset.getName() == "Fog" and getDistance(asset.getPosition(), enemy.getPosition()) < asset.getRadius():
+                enemy.setVisibilty(False)
+
+def manageMissiles(app):
+    # print("curr:", app.projectilesList)
+    for missile in app.missilesList:
+        if missile.isAlive:
+            missilePosition = missile.move()
+            # Check for collision with enemy
+            for enemy in app.spawnedEnemiesList:
+                if getDistance(missilePosition, enemy.getPosition()) < 25:
+                    enemy.setHealth(enemy.getHealth() - missile.damage)
+                    # Show red circle when hit
+                    enemy.showRedCircleEffect()
+                    app.missilesList.remove(missile)
+                    break
 
 def getNextPosition(app, currentPosition, enemy):
     if enemy.getIsCaught():
@@ -350,6 +399,7 @@ def game_onMousePress(app, mouseX, mouseY):
             app.score += (app.round-1)*2000+app.enemiesDefeated*100
         else:
             app.score += 2000 + app.enemiesDefeated * 100
+        app.missilesUsed = False
         app.preRound = False
         app.showRoundLabel = True
         app.roundStarted = True
@@ -363,6 +413,24 @@ def game_onMousePress(app, mouseX, mouseY):
     if isWithinRect(196, 670, 120, 40, mouseX, mouseY):
         app.gameOver = True
         app.roundStarted = False
+
+    # Launch missiles
+    if isWithinRect(898, 528, 180, 230, mouseX, mouseY) and len(app.spawnedEnemiesList) >= 5 and not app.missilesUsed:
+        app.missilesUsed = True
+        app.canFireMissiles = True
+        missile = Missiles((775,150), app.spawnedEnemiesList[0], 10000, app.coordsList)
+        app.missilesList.append(missile)
+        missile = Missiles((775, 250), app.spawnedEnemiesList[1], 10000, app.coordsList)
+        app.missilesList.append(missile)
+        missile = Missiles((775, 350), app.spawnedEnemiesList[2], 10000, app.coordsList)
+        app.missilesList.append(missile)
+        missile = Missiles((775, 450), app.spawnedEnemiesList[3], 10000, app.coordsList)
+        app.missilesList.append(missile)
+        missile = Missiles((775, 550), app.spawnedEnemiesList[4], 10000, app.coordsList)
+        app.missilesList.append(missile)
+    else:
+        app.canFireMissiles = False
+
 
     for tower in app.spawnedTowersList:
         print(tower, tower.getPosition())
@@ -378,7 +446,7 @@ def game_onMousePress(app, mouseX, mouseY):
     if isWithinRectTopLeft(810, 50, 180, 540, mouseX, mouseY):
         if app.selectedTower == None and app.roundStarted == True:
             for posX in range(0,2):
-                for posY in range(0,5):
+                for posY in range(0,4):
                     towerX, towerY = 812 + posX*90, 52 + posY*90
                     if isWithinRectTopLeft(towerX, towerY, 81, 81, mouseX, mouseY):
                         # print(app.allTowers, posX*6 + posY, posX, posY, "-", towerX, towerY, towerX + 81, towerY + 81, mouseX, mouseY)
@@ -411,9 +479,78 @@ def getSelectedTower(app, index):
     return app.allTowers[index]
 
 def game_onMouseMove(app, mouseX, mouseY):
+    app.hoverOverCard = False
+    app.hoveringOver = None
+    app.hoveringOverSpawned = False
     app.pointerColor = 'red'
     app.pointerLocation = (mouseX, mouseY)
+
+    for tower in app.spawnedTowersList:
+        towerX, towerY = tower.getPosition()
+        if isWithinRect(towerX, towerY, 50, 50, mouseX, mouseY):
+            app.hoverOverCard = True
+            app.hoveringOver = tower
+            app.hoveringOverSpawned = True
+            break
+
+    if isWithinRectTopLeft(810, 50, 180, 540, mouseX, mouseY):
+        if app.selectedTower == None and app.roundStarted == True:
+            for posX in range(0,2):
+                for posY in range(0,4):
+                    towerX, towerY = 812 + posX*90, 52 + posY*90
+                    if isWithinRectTopLeft(towerX, towerY, 81, 81, mouseX, mouseY):
+                        tower = getSelectedTower(app, posX * 4 + posY)
+                        app.hoverOverCard = True
+                        app.hoveringOver = tower
+                        app.hoveringOverSpawned = False
+                        app.towerPosition = (towerX, towerY)
+                        break
 
 def game_onKeyPress(app, key):
     if key == 'r' and app.gameOver:
         game_onScreenActivate(app)
+
+def drawInfoCard(app, tower, hoveringOverSpawned):
+    if hoveringOverSpawned:
+        towerPostion = tower.getPosition()
+        drawRect(towerPostion[0], towerPostion[1], 150, 200, fill='silver', border='darkGray', align='top-right', borderWidth=4, opacity=80)
+        drawLabel(tower.getName(), towerPostion[0]-75, towerPostion[1]+20,fill='black', bold=True, size=20, align='center')
+        drawLabel("Current Level: ", towerPostion[0] - 75, towerPostion[1] + 60, fill='black', bold=True, size=15,
+                  align='center')
+        drawLabel(str(tower.getLevel()), towerPostion[0] - 75, towerPostion[1] + 80, fill='black', bold=True, size=15,
+                  align='center')
+        drawLabel("Cost to Upgrade:", towerPostion[0] - 75, towerPostion[1] + 110, fill='black', bold=True, size=15,
+                  align='center')
+        upgradeCost = tower.getUpgradeCost()
+        if upgradeCost != None:
+            cost = str(tower.getUpgradeCost()) + "k"
+        else:
+            cost = "You have maxed out this tower!"
+        drawLabel(cost, towerPostion[0] - 75, towerPostion[1] + 130, fill='black', bold=True, size=15,
+                  align='center')
+        if tower.getDoesAttack():
+            drawLabel("Current Damage: ", towerPostion[0] - 75, towerPostion[1] + 160, fill='black', bold=True, size=15,
+                      align='center')
+            drawLabel(str(tower.getTowerDamage()), towerPostion[0] - 75, towerPostion[1] + 180, fill='black', bold=True, size=15,
+                      align='center')
+    else:
+        drawRect(app.towerPosition[0]-2, app.towerPosition[1]+4, 150, 200, fill='silver', border='darkGray', align='top-right',
+                 borderWidth=2, opacity=80)
+        drawLabel(tower.name, app.towerPosition[0]-75, app.towerPosition[1]+20, fill='black', bold=True, size=20, align='center')
+        drawLabel("Initial Tower Radius: ", app.towerPosition[0] - 75, app.towerPosition[1] + 60, fill='black', bold=True, size=15,
+                  align='center')
+        drawLabel(str(tower.initialTowerRadius), app.towerPosition[0] - 75, app.towerPosition[1] + 80, fill='black', bold=True, size=15,
+                  align='center')
+        drawLabel("Tower Cost:", app.towerPosition[0] - 75, app.towerPosition[1] + 110, fill='black', bold=True,
+                  size=15,
+                  align='center')
+        drawLabel(str(tower.towerCost), app.towerPosition[0] - 75, app.towerPosition[1] + 130, fill='black', bold=True,
+                  size=15,
+                  align='center')
+        drawLabel("Upgrades (Lvl: Cost):", app.towerPosition[0] - 75, app.towerPosition[1] + 160, fill='black', bold=True,
+                  size=15,
+                  align='center')
+        drawLabel(str(tower.upgradeCosts), app.towerPosition[0] - 75, app.towerPosition[1] + 180, fill='black', bold=True,
+                  size=15,
+                  align='center')
+
