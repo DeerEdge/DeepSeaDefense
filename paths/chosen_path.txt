@@ -1,1 +1,1 @@
-paths/custom_map3.txt
+paths/generated_path.txt

@@ -1,0 +1,1 @@
+paths/generated_assets_path.txt

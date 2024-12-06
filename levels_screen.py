@@ -5,6 +5,7 @@ from cmu_graphics import *
 from check_functions import *
 from widgets import *
 from math_functions import *
+from map_assets import *
 
 def levels_onScreenActivate(app):
     app.gameLeftTopX, app.gameLeftTopY = 12, 12
@@ -30,6 +31,7 @@ def levels_onScreenActivate(app):
                             imageWidth=220, imageHeight=170, border='white', borderWidth=5)
     clearGeneratedPath(app)
     app.chosenPath = ''
+    app.allAssets = [Sea_Cliff, Acid_74, Fog, Minerals, Peaks, Tornado]
 
 def clearGeneratedPath(app):
     clearFile("paths/generated_path.txt")
@@ -55,35 +57,58 @@ def levels_redrawAll(app):
     # Draw Mouse Pointer
     drawCircle(app.pointerLocation[0], app.pointerLocation[1], 5, fill=app.pointerColor)
 
+def generateAssets(path):
+    clearFile("paths/generated_assets_path.txt")
+    numAssets = rand.randint(1,3)
+    assets = []
+    for i in range(numAssets):
+        randomIndex = rand.randint(0, 5)
+        x, y = rand.randint(150, 630), rand.randint(150, 430)
+        asset = app.allAssets[randomIndex]((x,y))
+        assets.append(asset)
+
+    for asset in assets:
+        writeObjectsAndAttributes(path, asset.getName(), asset.getPosition(), asset.getRadius(),
+                                  asset.getColor(), asset.getBorderColor())
+    
 def levels_onMousePress(app, mouseX, mouseY):
     app.pointerColor = "lightgreen"
     # Check if back button was clicked
     if isWithinRect(70, 670, 120, 40, mouseX, mouseY):
         setActiveScreen('title')
-
+    
     if isWithinRect(4 * app.width // 5, 205, 224, 174, mouseX, mouseY):
         applyMathFuncByLevel(app, "hard", 10, 1.9, 1)
         writeLine("paths/chosen_path.txt", "paths/generated_path.txt")
+        generateAssets("paths/generated_assets_path.txt")
+        writeLine("paths/chosen_assets_path.txt", "paths/generated_assets_path.txt")
         setActiveScreen('game')
     elif isWithinRect(app.width // 2, 205, 224, 174, mouseX, mouseY):
         applyMathFuncByLevel(app, "medium", 12, 1.5, 20)
         writeLine("paths/chosen_path.txt", "paths/generated_path.txt")
+        generateAssets("paths/generated_assets_path.txt")
+        writeLine("paths/chosen_assets_path.txt", "paths/generated_assets_path.txt")
         setActiveScreen('game')
     elif isWithinRect(app.width // 5, 205, 224, 174, mouseX, mouseY):
         applyMathFuncByLevel(app, "easy", 15, 1.2, 40)
         writeLine("paths/chosen_path.txt", "paths/generated_path.txt")
+        generateAssets("paths/generated_assets_path.txt")
+        writeLine("paths/chosen_assets_path.txt", "paths/generated_assets_path.txt")
         setActiveScreen('game')
     elif isWithinRect(4 * app.width // 5, 460, 224, 174, mouseX, mouseY):
         applyMathFuncByLevel(app, "hard", 10, 1.9, 1)
         writeLine("paths/chosen_path.txt", "paths/custom_map3.txt")
+        writeLine("paths/chosen_assets_path.txt", "paths/custom_map3_assets.txt")
         setActiveScreen('game')
     elif isWithinRect(app.width // 2, 460, 224, 174, mouseX, mouseY):
         applyMathFuncByLevel(app, "medium", 12, 1.5, 20)
         writeLine("paths/chosen_path.txt", "paths/custom_map2.txt")
+        writeLine("paths/chosen_assets_path.txt", "paths/custom_map2_assets.txt")
         setActiveScreen('game')
     elif isWithinRect(app.width // 5, 460, 224, 174, mouseX, mouseY):
         applyMathFuncByLevel(app, "easy", 15, 1.2, 40)
         writeLine("paths/chosen_path.txt", "paths/custom_map1.txt")
+        writeLine("paths/chosen_assets_path.txt", "paths/custom_map1_assets.txt")
         setActiveScreen('game')
 
 def applyMathFuncByLevel(app, level, nSubdivisions, turnSharpness, randomnessWeight):

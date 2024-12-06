@@ -1,1 +1,1 @@
-['NAME:Minerals', 'POSITION:(397|193)', 'RADIUS:150', 'COLOR:orchid', 'BORDERCOLOR:mediumOrchid'] . 
+['NAME:Minerals', 'POSITION:(432|260)', 'RADIUS:150', 'COLOR:orchid', 'BORDERCOLOR:mediumOrchid'] . ['NAME:Peaks', 'POSITION:(159|389)', 'RADIUS:100', 'COLOR:tan', 'BORDERCOLOR:burlyWood'] . ['NAME:Acid_74', 'POSITION:(674|436)', 'RADIUS:100', 'COLOR:paleGreen', 'BORDERCOLOR:darkRed'] . 

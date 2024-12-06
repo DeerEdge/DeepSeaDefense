@@ -8,6 +8,8 @@ from projectiles import *
 from levels import *
 from widgets import *
 from special_powers import *
+from map_assets import *
+from mapeditor_screen import unpackAssets
 
 def game_onScreenActivate(app):
     app.pointerColor = "red"
@@ -16,6 +18,7 @@ def game_onScreenActivate(app):
     app.toBeSpawnedList = []
     app.allTowers = [Patrol_Tower, Laser_Turret, Magic_Portal, Tesla_Coil, Missile_Mech, Pulsar_Tower, Submarine,
                      Tooth_Trap, Monster_Net, Resource_Mine]
+    app.allAssets = [Sea_Cliff, Acid_74, Fog, Minerals, Peaks, Tornado]
     app.spawnedTowersList = []
     app.projectilesList = []
     app.roundStarted = False
@@ -40,6 +43,9 @@ def game_onScreenActivate(app):
     app.chosenPath = readLine("paths/chosen_path.txt")
     app.coordsList = readLineCoords(app.chosenPath)
     app.startCoord = app.coordsList[0]
+    app.chosenAssetsPath = readLine("paths/chosen_assets_path.txt")
+    app.spawnedAssets = unpackAssets(app.chosenAssetsPath)
+
 
 def game_redrawAll(app):
     # drawLabel('Started', app.width // 2, app.height // 5, size=80, font="monospace", bold=True)
@@ -104,8 +110,15 @@ def game_redrawAll(app):
 
     # Show Round # label before round starts
     if app.showRoundLabel:
-        drawLabel(f"Round {app.round}", app.width//2, app.height//3, size=50, bold=True, fill=rgb(223, 181, 72),
+        drawLabel(f"Round {app.round}", app.width//2-100, app.height//5, size=50, bold=True, fill=rgb(223, 181, 72),
                   border='yellow', borderWidth=2)
+
+    for asset in app.spawnedAssets:
+        currentPosition = asset.getPosition()
+        assetIcon = asset.getIconPath()
+        drawCircle(currentPosition[0], currentPosition[1], asset.radius, fill=asset.color, border=asset.borderColor,
+                   align="center", borderWidth=2, opacity=40)
+        drawImage(assetIcon, currentPosition[0], currentPosition[1], width=50, height=50, align='center')
 
     for tower in app.spawnedTowersList:
         currentPosition = tower.getPosition()
