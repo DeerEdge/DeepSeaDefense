@@ -11,12 +11,14 @@ from special_powers import *
 from map_assets import *
 from mapeditor_screen import unpackAssets
 
+# Initialize variables
 def game_onScreenActivate(app):
     app.pointerColor = "red"
     app.pointerLocation = (0, 0)
     app.spawnedEnemiesList = []
     app.toBeSpawnedList = []
-    app.allTowers = [Patrol_Tower, Laser_Turret, Magic_Portal, Pulsar_Tower, Submarine, Tooth_Trap, Monster_Net, Resource_Mine]
+    app.allTowers = [Patrol_Tower, Laser_Turret, Magic_Portal, Resource_Mine, Submarine, Tooth_Trap, Monster_Net,
+                     Resource_Mine]
     app.allAssets = [Acid_74, Fog, Minerals, Tornado]
     app.spawnedTowersList = []
     app.projectilesList = []
@@ -38,8 +40,10 @@ def game_onScreenActivate(app):
     app.towersPlaced = 0
     app.enemiesDefeated = 0
     app.score = 0
-    app.backButton = Button("back", 70, 670, 120, 40, "←  Back", fill='midnightBlue', border='black', textFill='white')
-    app.quitButton = Button("quit", 196, 670, 120, 40, "Quit Game", fill='red', border='black', textFill='white', borderWidth=2)
+    app.backButton = Button("back", 70, 670, 120, 40, "←  Back", fill='midnightBlue', border='black',
+                            textFill='white')
+    app.quitButton = Button("quit", 196, 670, 120, 40, "Quit Game", fill='red', border='black', textFill='white',
+                            borderWidth=2)
     app.chosenPath = readLine("paths/chosen_path.txt")
     app.coordsList = readLineCoords(app.chosenPath)
     app.startCoord = app.coordsList[0]
@@ -53,18 +57,14 @@ def game_onScreenActivate(app):
 
 
 def game_redrawAll(app):
-    # drawLabel('Started', app.width // 2, app.height // 5, size=80, font="monospace", bold=True)
     # Board drawing
     drawRect(0, 0, 1000, 700, fill=rgb(170, 123, 70))
     drawRect(5, 5, 990, 690, fill=rgb(188, 146, 87))
     drawImage("assets/images/game_screen/wood_background.jpg", 0, 0, width=1000, height=700)
-    # drawRect(0, 0, 1000, 700, fill=rgb(188, 146, 87))
-    # drawRect(5, 5, 990, 690, fill=rgb(170, 123, 70))
     drawRect(10, 50, 790, 590, fill='white', border='black', borderWidth=2)
     drawRect(12, 52, 786, 586, fill=rgb(0, 79, 180))
     drawLabel(f"{app.pointerLocation}", 17, 628, fill="white", size=15, align='left')
     drawLabel('Towers', 900, 30, size=30, bold=True, fill='white')
-    # drawLabel('Towers', 900, 30, size=30, font="monospace", bold=True)
 
     # Currency, defense health, and round labels
     heart_icon_path = "assets/images/game_screen/heart_icon.jpg"
@@ -79,7 +79,7 @@ def game_redrawAll(app):
     drawLabel(f"Round {app.round}", 690, 30, size=25, fill="white", align="left", bold=True)
     drawRect(670, 45, 130, 3, fill='white', align="left")
 
-    # Tower store drawing
+    # Draw right-side tower store
     for posX in range(2):
         for posY in range(4):
             drawRect(810 + posX*90, 50 + posY*90, 85, 85, fill='white', border='black', borderWidth=2)
@@ -88,7 +88,8 @@ def game_redrawAll(app):
 
     # Draw special power
     if app.missilesUsed == False:
-        drawRect(898, 528, 180, 230, fill=rgb(38, 138, 87), border="limeGreen", align="center", borderWidth=2, opacity=100)
+        drawRect(898, 528, 180, 230, fill=rgb(38, 138, 87), border="limeGreen", align="center", borderWidth=2,
+                 opacity=100)
     else:
         drawRect(898, 528, 180, 230, fill='salmon', border='darkRed', align="center", borderWidth=2,
                  opacity=100)
@@ -122,6 +123,7 @@ def game_redrawAll(app):
         drawRect(app.width//2 - 100, app.height//2 - 40, 200, 80, fill='white', border='black', borderWidth=2)
         drawLabel('Start Round', app.width//2, app.height//2, size=20, bold=True)
 
+    # Draw all assets that were generated or added in map editor
     for asset in app.spawnedAssets:
         currentPosition = asset.getPosition()
         assetIcon = asset.getIconPath()
@@ -129,6 +131,7 @@ def game_redrawAll(app):
                    align="center", borderWidth=2, opacity=40)
         drawImage(assetIcon, currentPosition[0], currentPosition[1], width=50, height=50, align='center')
 
+    # Draw all towers that were added to the playable area
     for tower in app.spawnedTowersList:
         currentPosition = tower.getPosition()
         towerIcon = tower.getIconPath()
@@ -137,6 +140,7 @@ def game_redrawAll(app):
         if type(tower) == Resource_Mine:
             tower.drawAnimation()
 
+    # Draw all enemies that were added to the playable area
     for enemy in app.spawnedEnemiesList:
         currentPosition = enemy.getPosition()
         enemyIcon = enemy.getIconPath()
@@ -145,19 +149,23 @@ def game_redrawAll(app):
         drawRect(currentPosition[0]-20, currentPosition[1] - 35, 40*enemyHealthBarValue+0.0001, 5, fill='limeGreen', align='left')
         drawImage(enemyIcon, currentPosition[0], currentPosition[1], width=50, height=50, align='center')
 
+        # Show attacked animation
         if enemy.redCircleTimer > 0:
             drawCircle(currentPosition[0], currentPosition[1], 10, fill=rgb(160, 0, 0), border='red', borderWidth=3)
 
+    # Draw all projectiles that were created and added to the playable area
     for projectile in app.projectilesList:
         if projectile.isAlive:
             projectilePosition = projectile.getPosition()
             projectile.draw(projectilePosition, 5)
 
+    # Draw all missiles from activating the special powerup
     for missile in app.missilesList:
         if missile.isAlive:
             missilePosition = missile.getPosition()
             missile.drawIcon(missilePosition)
 
+    # If a tower is chosen, its effective area of impact will be highlighted on the board
     if app.selectedTower != None:
         locationX, locationY = app.pointerLocation[0], app.pointerLocation[1]
         if app.pointerLocation[0] <= 25: locationX = 25
@@ -173,9 +181,11 @@ def game_redrawAll(app):
                    align="center", borderWidth=2, opacity=40)
         drawImage(app.selectedTower.iconPath, app.pointerLocation[0]-25, app.pointerLocation[1]-25, width=50, height=50)
 
+    # If mouse is hovering over a tower card, we draw the tower's info
     if app.hoverOverCard:
         drawInfoCard(app, app.hoveringOver, app.hoveringOverSpawned)
 
+    # If the round hasn't started we have a preliminary screen to start the round
     if app.roundStarted != True and app.defenseHealth > 0:
         drawRect(0, 0, 1000, 700, fill='gray', opacity=50)
         drawRect(app.width // 2 - 100, app.height // 2 - 40, 200, 80, fill='gray', border='black', borderWidth=2)
@@ -187,6 +197,7 @@ def game_redrawAll(app):
                   fill=rgb(223, 181, 72),
                   border='yellow', borderWidth=2)
 
+    # If we lose all of our health points, we display the game over screen
     if app.gameOver:
         drawRect(0, 0, app.width, app.height, fill='black', opacity=50)
         drawLabel("GAME OVER", app.width//2, app.height//2 - 50, size=50, fill='red', bold=True)
@@ -201,16 +212,20 @@ def game_redrawAll(app):
     # Draw Mouse Pointer
     drawCircle(app.pointerLocation[0], app.pointerLocation[1], 5, fill=app.pointerColor)
 
+# Adds all enemies that will be spawned in the round to a list to processed
 def spawnEnemies(app):
     if app.round in levels:
         level_monsters = levels[app.round]
-
         for monster_type, count in level_monsters.items():
             for i in range(count):
                 if monster_type == "serpents":
                     enemy = Serpent(app.startCoord, app.startCoord, app.coordsList[1])
                 elif monster_type == "slithers":
                     enemy = Slither(app.startCoord, app.startCoord, app.coordsList[1])
+                elif monster_type == "queens":
+                    enemy = Queen(app.startCoord, app.startCoord, app.coordsList[1])
+                elif monster_type == "worms":
+                    enemy = Worm(app.startCoord, app.startCoord, app.coordsList[1])
                 app.toBeSpawnedList.append(enemy)
 
 def game_onStep(app):
@@ -236,7 +251,7 @@ def game_onStep(app):
     if app.roundStarted == False:
         return
 
-    # Controls the spawning of enemies
+    # Controls the spawning of enemies so there is separation
     if app.roundStarted and app.toBeSpawnedList != []:
         app.enemySpawnTimer += 1
         if app.enemySpawnTimer >= app.spawnInterval * app.stepsPerSecond:
@@ -248,6 +263,8 @@ def game_onStep(app):
     manageEnemies(app)
     manageMissiles(app)
 
+# Manages towers and activates the tower's attacks if an enemy comes in range. Actions are separated by whether the
+# towers are static or dynamic. Special actions such as the Submarine's movement are processed individually.
 def manageTowers(app):
     for tower in app.spawnedTowersList:
         if tower.getTowerType() == "dynamic":
@@ -293,11 +310,12 @@ def manageTowers(app):
                     app.currency += tower.getProfit()
                     tower.setProfit(0)
 
+# Manage the movement and attacks of the created projectiles
 def manageProjectiles(app):
-    # print("curr:", app.projectilesList)
     for projectile in app.projectilesList:
         if projectile.isAlive:
             projectilePosition = projectile.move()
+
             # Check for collision with enemy
             for enemy in app.spawnedEnemiesList:
                 if type(projectile) in [Bullet] and getDistance(projectilePosition, enemy.getPosition()) < 25:
@@ -307,7 +325,8 @@ def manageProjectiles(app):
                     app.projectilesList.remove(projectile)
                     break
                 elif type(projectile) in [Laser, Light_Ray]:
-                    if projectile.getEnemy().getHealth() <= 0 or (getDistance(projectile.getEnemy().getPosition(), projectile.getParentTower().getPosition()) > projectile.getParentTower().getTowerRadius()):
+                    if projectile.getEnemy().getHealth() <= 0 or ((getDistance(projectile.getEnemy().getPosition(),
+                            projectile.getParentTower().getPosition()) > projectile.getParentTower().getTowerRadius())):
                         projectile.changeEnemy(app.spawnedEnemiesList, enemy)
                         if projectile.getEnemy() == None:
                             app.projectilesList.remove(projectile)
@@ -318,6 +337,7 @@ def manageProjectiles(app):
                         projectile.getEnemy().showRedCircleEffect()
                         break
 
+# Manage enemies and their health + movement
 def manageEnemies(app):
     for enemy in app.spawnedEnemiesList:
         enemy.updateRedCircleEffect()
@@ -335,6 +355,8 @@ def manageEnemies(app):
             newPosition = getNextPosition(app, currentPosition, enemy)
             enemy.setPosition(newPosition)
         enemy.setVisibilty(True)
+
+        # Account for effects of assets on the enemy
         for asset in app.spawnedAssets:
             if asset.getName() == "Acid_74" and getDistance(asset.getPosition(), enemy.getPosition()) < asset.getRadius():
                 enemy.setHealth(enemy.getHealth() + 5)
@@ -345,8 +367,8 @@ def manageEnemies(app):
             elif asset.getName() == "Fog" and getDistance(asset.getPosition(), enemy.getPosition()) < asset.getRadius():
                 enemy.setVisibilty(False)
 
+# Manage special powerup missiles
 def manageMissiles(app):
-    # print("curr:", app.projectilesList)
     for missile in app.missilesList:
         if missile.isAlive:
             missilePosition = missile.move()
@@ -359,6 +381,7 @@ def manageMissiles(app):
                     app.missilesList.remove(missile)
                     break
 
+# Calculate the next position of the enemy based on its movement type
 def getNextPosition(app, currentPosition, enemy):
     if enemy.getIsCaught():
         return currentPosition
@@ -376,6 +399,7 @@ def getNextPosition(app, currentPosition, enemy):
         enemy.setPreviousCoord(previousCoord)
         enemy.setTargetCoord(targetCoord)
 
+    # Check for which movementType it is
     if movementType == "linear":
         changeX = (targetCoord[0]-previousCoord[0])*stepSize
         changeY = (targetCoord[1]-previousCoord[1])*stepSize
@@ -431,9 +455,8 @@ def game_onMousePress(app, mouseX, mouseY):
     else:
         app.canFireMissiles = False
 
-
+    # Check if towers are upgraded
     for tower in app.spawnedTowersList:
-        print(tower, tower.getPosition())
         towerX, towerY = tower.getPosition()
         if isWithinRect(towerX, towerY, 50, 50, mouseX, mouseY):
             upgradeCost = tower.getUpgradeCost()
@@ -442,6 +465,7 @@ def game_onMousePress(app, mouseX, mouseY):
                 tower.upgrade()
                 break
 
+    # Check if tower has been selected to be placed
     notFound = True
     if isWithinRectTopLeft(810, 50, 180, 540, mouseX, mouseY):
         if app.selectedTower == None and app.roundStarted == True:
@@ -449,7 +473,6 @@ def game_onMousePress(app, mouseX, mouseY):
                 for posY in range(0,4):
                     towerX, towerY = 812 + posX*90, 52 + posY*90
                     if isWithinRectTopLeft(towerX, towerY, 81, 81, mouseX, mouseY):
-                        # print(app.allTowers, posX*6 + posY, posX, posY, "-", towerX, towerY, towerX + 81, towerY + 81, mouseX, mouseY)
                         tower = getSelectedTower(app, posX*4 + posY)
                         if app.currency >= tower.towerCost:
                             app.selectedTower = tower
@@ -459,7 +482,6 @@ def game_onMousePress(app, mouseX, mouseY):
                     continue
                 else:
                     break
-
     elif app.selectedTower != None and isWithinRectTopLeft(10, 10, 790, 590, mouseX, mouseY):
         tower = app.selectedTower((mouseX, mouseY))
         app.spawnedTowersList.append(tower)
@@ -467,7 +489,7 @@ def game_onMousePress(app, mouseX, mouseY):
         app.towersPlaced += 1
         app.selectedTower = None
 
-
+# Check if enemy has reached the end of the path
 def isEnemyAtEnd(app, currentPosition):
     endCoord = app.coordsList[-1]
     if getDistance(currentPosition, endCoord) <= 20:
@@ -475,6 +497,7 @@ def isEnemyAtEnd(app, currentPosition):
     else:
         return False
 
+# Get the selected tower
 def getSelectedTower(app, index):
     return app.allTowers[index]
 
@@ -485,6 +508,7 @@ def game_onMouseMove(app, mouseX, mouseY):
     app.pointerColor = 'red'
     app.pointerLocation = (mouseX, mouseY)
 
+    # Check if mouse is hovering over a spawned tower
     for tower in app.spawnedTowersList:
         towerX, towerY = tower.getPosition()
         if isWithinRect(towerX, towerY, 50, 50, mouseX, mouseY):
@@ -493,6 +517,7 @@ def game_onMouseMove(app, mouseX, mouseY):
             app.hoveringOverSpawned = True
             break
 
+    # Check if mouse is hovering over a tower store tower
     if isWithinRectTopLeft(810, 50, 180, 540, mouseX, mouseY):
         if app.selectedTower == None and app.roundStarted == True:
             for posX in range(0,2):
@@ -510,6 +535,7 @@ def game_onKeyPress(app, key):
     if key == 'r' and app.gameOver:
         game_onScreenActivate(app)
 
+# Draw the info card about a tower in the tower store, or about a spawned tower
 def drawInfoCard(app, tower, hoveringOverSpawned):
     if hoveringOverSpawned:
         towerPostion = tower.getPosition()
@@ -525,7 +551,7 @@ def drawInfoCard(app, tower, hoveringOverSpawned):
         if upgradeCost != None:
             cost = str(tower.getUpgradeCost()) + "k"
         else:
-            cost = "You have maxed out this tower!"
+            cost = "Maxed out tower!"
         drawLabel(cost, towerPostion[0] - 75, towerPostion[1] + 130, fill='black', bold=True, size=15,
                   align='center')
         if tower.getDoesAttack():

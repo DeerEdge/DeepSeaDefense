@@ -17,16 +17,19 @@ def isWithinRectLeft(topLeftX, topLeftY, width, height, mouseX, mouseY):
         return True
     return False
 
+# Clear a text file
 def clearFile(fileName):
     file = open(fileName, 'w')
     return
 
+# Write asset object info to a file
 def writeObjectsAndAttributes(fileName, objectName, position, radius, color, borderColor):
     file = open(fileName, 'a')
     file.write(str(["NAME:"+objectName, "POSITION:("+str(position[0])+"|"+str(position[1])+")", "RADIUS:"+str(radius), "COLOR:"+str(color),
                     "BORDERCOLOR:"+str(borderColor)]) + ' . ')
     file.close()
 
+# Write a line to a file
 def writeLine(fileName, text):
     clearFile(fileName)
     file = open(fileName, 'a')
@@ -44,6 +47,7 @@ def writeLineCoord(fileName, coord):
     file.write(str(coord) + ' . ')
     file.close()
 
+# Read path coordinates
 def readLineCoords(fileName):
     file = open(fileName, 'r')
     contents = file.read()
@@ -70,18 +74,17 @@ def getSlope(coord1, coord2):
     coord2X, coord2Y = coord2
     return (coord2Y-coord1Y)/(coord2X-coord1X)
 
+# Decode asset file and create a list of individual asset information
 def getAssetsFromFile(fileName):
     file = open(fileName, 'r')
     contents = file.read()
 
     assets = []
     for assetInfo in contents.split(" . "):
-        print(assetInfo)
         if not assetInfo.isspace() and assetInfo != '':
             left = assetInfo.find("[")
             right = assetInfo.find("]")
             for parameter in assetInfo.split(","):
-                print(parameter)
                 if "NAME:" in parameter:
                     assetName = parameter[parameter.find(":")+1:len(parameter)-1]
                 elif "POSITION:" in parameter:

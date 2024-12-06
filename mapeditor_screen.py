@@ -16,6 +16,9 @@ def mapeditor_onScreenActivate(app):
     app.mapToEdit = "Map 1"
     app.selectedAsset = None
     app.spawnedAssets = unpackAssets(app.mapAssetsPath)
+    app.hoverOverCard = False
+    app.hoveringOver = None
+    app.assetPosition = (0, 0)
 
 def mapeditor_redrawAll(app):
     drawImage("assets/images/game_screen/wood_background.jpg", 0, 0, width=1000, height=700)
@@ -59,6 +62,9 @@ def mapeditor_redrawAll(app):
     app.undoButton.draw()
     app.backButton.draw()
 
+    if app.hoverOverCard:
+        drawInfoCard(app, app.hoveringOver)
+
     drawLabel('Currently Editing: ', 200, 630, size=25, bold=True, fill='white', align='left')
     drawRect(30+370, 630, 270, 40, fill='navy', align='left', border='black', borderWidth=2)
     if app.mapToEdit == "Map 1":
@@ -86,6 +92,7 @@ def mapeditor_redrawAll(app):
     # Draw Mouse Pointer
     drawCircle(app.pointerLocation[0], app.pointerLocation[1], 5, fill=app.pointerColor)
 
+# Unpack assets from list and create a list of asset objects (decoding part)
 def unpackAssets(path):
     rawAssetsList = getAssetsFromFile(path)
     unpackedAssetsList = []
@@ -113,7 +120,6 @@ def unpackAssets(path):
         unpackedAssetsList.append(asset)
     return unpackedAssetsList
 
-
 def mapeditor_onMousePress(app, mouseX, mouseY):
     app.pointerColor = "lightgreen"
     if app.saveButton.containsPoint(mouseX, mouseY):
@@ -124,11 +130,6 @@ def mapeditor_onMousePress(app, mouseX, mouseY):
         for asset in app.spawnedAssets:
             writeObjectsAndAttributes(app.mapAssetsPath, asset.getName(), asset.getPosition(), asset.getRadius(),
                                       asset.getColor(), asset.getBorderColor())
-        print(unpackAssets(app.mapAssetsPath))
-        print("Path saved")
-        # if isWithinRectTopLeft( 10, 10, 790, 590, mouseX, mouseY):
-        #     writeLineCoord("sample_paths.txt", (mouseX, mouseY))
-        #     print("Added point: ", (mouseX, mouseY))
 
     if app.resetButton.containsPoint(mouseX, mouseY):
         app.coordsList = readLineCoords(app.mapPath)
@@ -143,7 +144,6 @@ def mapeditor_onMousePress(app, mouseX, mouseY):
 
     if app.selectedAsset == None and isWithinRect(400, 300, 780, 580, mouseX, mouseY):
         app.coordsList.append((mouseX, mouseY))
-        print("Added point:", (mouseX, mouseY))
 
     if app.backButton.containsPoint(mouseX, mouseY):
         setActiveScreen('title')
@@ -168,6 +168,7 @@ def mapeditor_onMousePress(app, mouseX, mouseY):
         app.mapAssetsPath = "paths/custom_map3_assets.txt"
         app.spawnedAssets = unpackAssets(app.mapAssetsPath)
 
+    # Check if asset was selected to be placed
     if isWithinRectTopLeft(810, 50, 180, 540, mouseX, mouseY):
         if app.selectedAsset == None:
             for posX in range(0,2):
@@ -186,7 +187,41 @@ def getSelectedAsset(app, index):
     return app.allAssets[index]
 
 def mapeditor_onMouseMove(app, mouseX, mouseY):
+    app.hoverOverCard = False
+    app.hoveringOver = None
     app.pointerLocation = (mouseX, mouseY)
+
+    # Check if assets in store are being hovered over
+    if isWithinRectTopLeft(810, 50, 180, 540, mouseX, mouseY):
+        if app.selectedAsset == None:
+            for posX in range(0,2):
+                for posY in range(0,4):
+                    assetX, assetY = 815 + posX*90, 307 + posY*90
+                    if isWithinRectTopLeft(assetX, assetY, 81, 81, mouseX, mouseY):
+                        asset = getSelectedAsset(app, posX * 2 + posY)
+                        app.hoverOverCard = True
+                        app.hoveringOver = asset
+                        app.assetPosition = (assetX, assetY)
+                        break
+
+# Draw asset info when mouse is hovering over
+def drawInfoCard(app, asset):
+    drawRect(app.assetPosition[0]-2, app.assetPosition[1]+4, 150, 180, fill='silver', border='darkGray', align='top-right',
+             borderWidth=2, opacity=80)
+    drawLabel(asset.name, app.assetPosition[0]-75, app.assetPosition[1]+20, fill='black', bold=True, size=20, align='center')
+    drawLabel("Asset Radius: ", app.assetPosition[0] - 75, app.assetPosition[1] + 60, fill='black', bold=True, size=15,
+              align='center')
+    drawLabel(str(asset.radius), app.assetPosition[0] - 75, app.assetPosition[1] + 80, fill='black', bold=True, size=15,
+              align='center')
+    drawLabel("Function:", app.assetPosition[0] - 75, app.assetPosition[1] + 110, fill='black', bold=True,
+              size=15,
+              align='center')
+    drawLabel(str(asset.function), app.assetPosition[0] - 75, app.assetPosition[1] + 130, fill='black', bold=True,
+              size=15,
+              align='center')
+    drawLabel(str(asset.functionCont), app.assetPosition[0] - 75, app.assetPosition[1] + 150, fill='black', bold=True,
+              size=15,
+              align='center')
 
 
 

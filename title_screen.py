@@ -3,6 +3,7 @@ from check_functions import *
 from game_screen import *
 from mapeditor_screen import *
 from levels_screen import *
+from rulebook_screen import *
 
 def onAppStart(app):
     app.color = "blue"
@@ -57,6 +58,8 @@ def title_onMousePress(app, mouseX, mouseY):
     app.pointerColor = 'lightgreen'
     if isWithinRect(app.width // 2, app.height // 2 - 50, app.width // 4, app.height // 10, mouseX, mouseY):
         setActiveScreen('levels')
+    elif isWithinRect(app.width // 2, app.height // 2 + 40, app.width // 4, app.height // 10, mouseX, mouseY):
+        setActiveScreen('rulebook')
     elif isWithinRect(app.width // 2, app.height // 2 + 130, app.width // 4, app.height // 10, mouseX, mouseY):
         setActiveScreen('mapeditor')
 
@@ -65,6 +68,6 @@ def title_onMouseMove(app, mouseX, mouseY):
     app.pointerLocation = (mouseX, mouseY)
 
 def main():
-    runAppWithScreens(initialScreen='levels')
+    runAppWithScreens(initialScreen='title')
 
 main()

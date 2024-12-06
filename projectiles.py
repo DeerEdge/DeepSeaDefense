@@ -120,7 +120,7 @@ class Light_Ray(Projectile):
             drawLine(self.position[0], self.position[1], targetPosition[0]+3, targetPosition[1]-3, fill=borderRightColorFill, lineWidth=3)
             drawLine(self.position[0], self.position[1], targetPosition[0] - 3, targetPosition[1] + 3, fill=innerColorFill, lineWidth=5)
             drawLine(self.position[0], self.position[1], targetPosition[0], targetPosition[1], fill=borderLeftColorFill, lineWidth=3)
-            drawStar(targetPosition[0], targetPosition[1], 30, 7, fill=borderLeftColorFill, opacity=(self.stepCounter*9))
+            drawStar(targetPosition[0], targetPosition[1], 30, 7, fill=borderLeftColorFill, opacity=(self.stepCounter*8))
             drawStar(targetPosition[0], targetPosition[1], 30, 7, fill="mediumSlateBlue", opacity=(self.stepCounter*5), rotateAngle=45)
         elif self.target != None:
             targetPosition = self.target.getPosition()

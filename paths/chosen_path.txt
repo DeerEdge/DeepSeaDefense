@@ -1,1 +1,1 @@
-paths/custom_map1.txt
+paths/custom_map3.txt

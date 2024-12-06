@@ -61,18 +61,6 @@ class Monster:
         else:
             return False
 
-class Serpent(Monster):
-    healthPoints = 1000
-    def __init__(self, position, previousCoord, targetCoord, name="Serpent"):
-        super().__init__(name, position, previousCoord, targetCoord)
-        self.iconPath = "assets/images/enemies/serpent.png"
-        self.healthPoints = 1000
-        self.reward = 50
-        self.speed = 10
-        self.movementType = "logarithmic"
-        self.damage = 5
-        self.killScore = 1000
-
     def getMovementType(self):
         return self.movementType
 
@@ -90,6 +78,42 @@ class Serpent(Monster):
             self.healthPoints = 0
         else:
             self.healthPoints = newHealthPoints
+
+class Queen(Monster):
+    healthPoints = 30000
+    def __init__(self, position, previousCoord, targetCoord, name="Queen"):
+        super().__init__(name, position, previousCoord, targetCoord)
+        self.iconPath = "assets/images/enemies/queen.png"
+        self.healthPoints = 30000
+        self.reward = 200
+        self.speed = 7
+        self.movementType = "linear"
+        self.damage = 11
+        self.killScore = 5000
+
+class Worm(Monster):
+    healthPoints = 800
+    def __init__(self, position, previousCoord, targetCoord, name="Queen"):
+        super().__init__(name, position, previousCoord, targetCoord)
+        self.iconPath = "assets/images/enemies/leeching-worm.png"
+        self.healthPoints = 800
+        self.reward = 80
+        self.speed = 15
+        self.movementType = "logarithmic"
+        self.damage = 2
+        self.killScore = 800
+
+class Serpent(Monster):
+    healthPoints = 2000
+    def __init__(self, position, previousCoord, targetCoord, name="Serpent"):
+        super().__init__(name, position, previousCoord, targetCoord)
+        self.iconPath = "assets/images/enemies/serpent.png"
+        self.healthPoints = 2000
+        self.reward = 50
+        self.speed = 10
+        self.movementType = "logarithmic"
+        self.damage = 5
+        self.killScore = 1000
 
 class Slither(Monster):
     healthPoints = 500
@@ -103,24 +127,6 @@ class Slither(Monster):
         self.movementType = "linear"
         self.damage = 3
         self.killScore = 1200
-
-    def getMovementType(self):
-        return self.movementType
-
-    def getIconPath(self):
-        return self.iconPath
-
-    def getReward(self):
-        return self.reward
-
-    def getHealth(self):
-        return self.healthPoints
-
-    def setHealth(self, newHealthPoints):
-        if newHealthPoints < 0:
-            self.healthPoints = 0
-        else:
-            self.healthPoints = newHealthPoints
 
     def activateSpeedBoost(self):
         self.speedBoostActive = True

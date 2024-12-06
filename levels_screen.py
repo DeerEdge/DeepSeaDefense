@@ -31,12 +31,13 @@ def levels_onScreenActivate(app):
                             imageWidth=220, imageHeight=170, border='white', borderWidth=5)
     clearGeneratedPath(app)
     app.chosenPath = ''
-    app.allAssets = [Sea_Cliff, Acid_74, Fog, Minerals, Peaks, Tornado]
+    app.allAssets = [Acid_74, Fog, Minerals, Tornado]
 
 def clearGeneratedPath(app):
     clearFile("paths/generated_path.txt")
 
 def levels_redrawAll(app):
+    # Draw buttons and labels
     drawImage("assets/images/game_screen/wood_background.jpg", 0, 0, width=1000, height=700)
     drawLabel('Game Levels', app.width//2, 50, size=50, bold=True, fill='white')
     drawLabel('Easy', app.width // 5, 100, size=25, bold=True, fill='white')
@@ -54,15 +55,17 @@ def levels_redrawAll(app):
     app.map1Button.draw()
     app.map2Button.draw()
     app.map3Button.draw()
+
     # Draw Mouse Pointer
     drawCircle(app.pointerLocation[0], app.pointerLocation[1], 5, fill=app.pointerColor)
 
+# Generate map assets in a set area in playable area
 def generateAssets(path):
     clearFile("paths/generated_assets_path.txt")
     numAssets = rand.randint(1,3)
     assets = []
     for i in range(numAssets):
-        randomIndex = rand.randint(0, 5)
+        randomIndex = rand.randint(0, 3)
         x, y = rand.randint(150, 630), rand.randint(150, 430)
         asset = app.allAssets[randomIndex]((x,y))
         assets.append(asset)
@@ -73,10 +76,12 @@ def generateAssets(path):
     
 def levels_onMousePress(app, mouseX, mouseY):
     app.pointerColor = "lightgreen"
+
     # Check if back button was clicked
     if isWithinRect(70, 670, 120, 40, mouseX, mouseY):
         setActiveScreen('title')
-    
+
+    # Either generate maps or load custom maps
     if isWithinRect(4 * app.width // 5, 205, 224, 174, mouseX, mouseY):
         applyMathFuncByLevel(app, "hard", 10, 1.9, 1)
         writeLine("paths/chosen_path.txt", "paths/generated_path.txt")
@@ -111,6 +116,8 @@ def levels_onMousePress(app, mouseX, mouseY):
         writeLine("paths/chosen_assets_path.txt", "paths/custom_map1_assets.txt")
         setActiveScreen('game')
 
+# Utilize a math function to calculate slope and smooth out change. Subdividions are especially utilized to determine
+# path length
 def applyMathFuncByLevel(app, level, nSubdivisions, turnSharpness, randomnessWeight):
     pointValues = []
     if level == "hard":
@@ -126,31 +133,31 @@ def applyMathFuncByLevel(app, level, nSubdivisions, turnSharpness, randomnessWei
             x = i * 2 * math.pi / nSubdivisions
             pointValues.append((x, sineSquared(x)/2))
 
+    # Find tangent lines to be calculated into the threshold
     tangentLines = []
     for i in range(len(pointValues)-1):
         tangentLines.append((pointValues[i+1][1]-pointValues[i][1])/(pointValues[i+1][0]-pointValues[i][0]))
         tangentLines[-1] = tangentLines[-1]*rand.randint(100, 100*randomnessWeight)/100*rand.randint(-1,1)
 
-    print(pointValues, tangentLines)
     return generatePathBasedOnLevel(app, tangentLines, nSubdivisions, turnSharpness)
 
 def writePathList(coordsList):
     for coord in coordsList:
         writeLineCoord("paths/generated_path.txt", coord)
 
+# Utilize backtracking to find a satisfying path
 def generatePathBasedOnLevel(app, tangentLines, nSubdivisions, turnSharpness):
     initialCoord = (20, rand.randint(80, app.gameHeight-80))
     coordsList = []
     coordsList.append(initialCoord)
-    print("initital", coordsList)
+
     resultPathList = solvePath(app, copy.copy(coordsList), tangentLines, nSubdivisions, turnSharpness)
-    print(resultPathList)
     writePathList(resultPathList)
 
+# Solve for path, checks for edges and ending
 def solvePath(app, coordsList, tangentLines, nSubdivisions, turnSharpness):
     divisionWidth = app.gameWidth//nSubdivisions
     possibleNextCoords = getPossibleNextCoords(app, coordsList, nSubdivisions, divisionWidth)
-    # print(divisionWidth, coordsList, possibleNextCoords)
     lastCoord = coordsList[-1]
     closestPointOnEdge = (12 + app.gameWidth, lastCoord[1])
     if (getDistance(lastCoord, closestPointOnEdge) < 20):
@@ -165,6 +172,7 @@ def solvePath(app, coordsList, tangentLines, nSubdivisions, turnSharpness):
             nextCoord = possibleNextCoords[randomIndex]
             if canAddCoordToList(nextCoord, coordsList, tangentLines, divisionWidth, turnSharpness):
                 coordsList.append(nextCoord)
+                # Utilize known coords to find next segment
                 solution = solvePath(app, coordsList, tangentLines, nSubdivisions, turnSharpness)
                 if solution != None:
                     return solution
@@ -173,22 +181,24 @@ def solvePath(app, coordsList, tangentLines, nSubdivisions, turnSharpness):
                 possibleNextCoords.pop(randomIndex)
         return None
 
+# Checks if coordinate can be added based on formulated line segment threshold expression
 def canAddCoordToList(nextCoord, coordsList, tangentLines, divisionWidth, turnSharpness):
     previousCoord = coordsList[-1]
     i = len(coordsList)-2
     tangentValue = abs(tangentLines[i])
     xDist = abs(divisionWidth)
-    print(previousCoord, nextCoord, xDist + 10*tangentValue, getDistance(previousCoord, nextCoord), xDist + 20*tangentValue)
-    if len(coordsList) < 2 and abs(xDist*turnSharpness + 10*tangentValue) <= getDistance(previousCoord, nextCoord) <= abs(xDist*1.1*turnSharpness + 40*tangentValue):
+    if len(coordsList) < 2 and (abs(xDist*turnSharpness + 10*tangentValue) <= getDistance(previousCoord, nextCoord)
+                                <= abs(xDist*1.1*turnSharpness + 40*tangentValue)):
         return True
     elif len(coordsList) >= 2:
         secondLastCoord = coordsList[0]
         previousSlope = getSlope(secondLastCoord, previousCoord)
-        print("--->", previousCoord, nextCoord, previousSlope - tangentValue, getSlope(previousCoord, nextCoord), previousSlope + tangentValue)
-        if previousSlope*turnSharpness - 2*tangentValue <= abs(getSlope(previousCoord, nextCoord)) <= abs(previousSlope*1.3*turnSharpness + 2*tangentValue):
+        if (previousSlope*turnSharpness - 2*tangentValue <= abs(getSlope(previousCoord, nextCoord))
+                <= abs(previousSlope*1.3*turnSharpness + 2*tangentValue)):
             return True
     return False
 
+# Finds all possible next coordinates
 def getPossibleNextCoords(app, coordsList, nSubdivisions, divisionWidth):
     recentCoord = coordsList[-1]
     xSetAt = recentCoord[0]+divisionWidth
