@@ -11,6 +11,12 @@ def isWithinRectTopLeft(topLeftX, topLeftY, width, height, mouseX, mouseY):
         return True
     return False
 
+# Checks if a mouse action occurred inside a rectangle (rects aligned by their left-side)
+def isWithinRectLeft(topLeftX, topLeftY, width, height, mouseX, mouseY):
+    if (topLeftX <= mouseX <= topLeftX + width) and (topLeftY - height//2 <= mouseY <= topLeftY + height//2):
+        return True
+    return False
+
 def clearFile(fileName):
     file = open(fileName, 'w')
     return

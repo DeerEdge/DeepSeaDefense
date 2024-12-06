@@ -65,6 +65,6 @@ def title_onMouseMove(app, mouseX, mouseY):
     app.pointerLocation = (mouseX, mouseY)
 
 def main():
-    runAppWithScreens(initialScreen='title')
+    runAppWithScreens(initialScreen='mapeditor')
 
 main()

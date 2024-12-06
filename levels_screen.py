@@ -19,6 +19,15 @@ def levels_onScreenActivate(app):
     app.hardLevelButton = Button("hard",  4 * app.width // 5, 205, 224, 174, image='assets/images/levels_screen/hardLevelSample.png',
                                  imageWidth=220, imageHeight=170, border='white', borderWidth=5)
     app.backButton = Button("back", 70, 670, 120, 40, "←  Back", fill='midnightBlue', border='black', textFill='white')
+    app.map1Button = Button("easy", app.width // 5, 460, 224, 174, foregroundLabel='Map 1', size=20,
+                            image='assets/images/levels_screen/easyLevelSample.png',
+                            imageWidth=220, imageHeight=170, border='white', borderWidth=5)
+    app.map2Button = Button("easy",  app.width // 2, 460, 224, 174, foregroundLabel='Map 2', size=20,
+                            image='assets/images/levels_screen/easyLevelSample.png',
+                            imageWidth=220, imageHeight=170, border='white', borderWidth=5)
+    app.map3Button = Button("easy", 4 * app.width // 5, 460, 224, 174, foregroundLabel='Map 3', size=20,
+                            image='assets/images/levels_screen/easyLevelSample.png',
+                            imageWidth=220, imageHeight=170, border='white', borderWidth=5)
     clearGeneratedPath(app)
 
 def clearGeneratedPath(app):
@@ -39,7 +48,9 @@ def levels_redrawAll(app):
     app.backButton.draw()
 
     drawLabel('Custom Levels', app.width // 2, 350, size=30, bold=True, fill='white')
-
+    app.map1Button.draw()
+    app.map2Button.draw()
+    app.map3Button.draw()
     # Draw Mouse Pointer
     drawCircle(app.pointerLocation[0], app.pointerLocation[1], 5, fill=app.pointerColor)
 
